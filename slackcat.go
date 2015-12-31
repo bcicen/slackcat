@@ -66,13 +66,18 @@ func readIn(tee bool) *os.File {
 	return tmp
 }
 
-func postToSlack(token, path, name, channelName string) error {
+func postToSlack(token, path, name, channelName string, noop bool) error {
 	defer os.Remove(path)
 
 	api := slack.New(token)
 	channel, err := api.FindChannelByName(channelName)
 	if err != nil {
 		return err
+	}
+
+	if noop {
+		fmt.Printf("skipping upload of file %s to %s\n", name, channel.Name)
+		return nil
 	}
 
 	err = api.FilesUpload(&slack.FilesUploadOpt{
@@ -85,7 +90,7 @@ func postToSlack(token, path, name, channelName string) error {
 		return err
 	}
 
-	fmt.Printf("file %s uploaded to %s\n", name, channelName)
+	fmt.Printf("file %s uploaded to %s\n", name, channel.Name)
 	return nil
 }
 
@@ -113,6 +118,10 @@ func main() {
 			Name:  "tee, t",
 			Usage: "Print stdin to screen before posting",
 		},
+		cli.BoolFlag{
+			Name:  "noop",
+			Usage: "Skip posting file to Slack. Useful for testing.",
+		},
 		cli.StringFlag{
 			Name:  "channel, c",
 			Usage: "Slack channel to post to",
@@ -129,7 +138,7 @@ func main() {
 		tmpPath := readIn(c.Bool("tee"))
 		fileName := strconv.FormatInt(time.Now().Unix(), 10)
 
-		err := postToSlack(token, tmpPath.Name(), fileName, c.String("channel"))
+		err := postToSlack(token, tmpPath.Name(), fileName, c.String("channel"), c.Bool("noop"))
 		failOnError(err, "error uploading file to Slack", true)
 	}
 
