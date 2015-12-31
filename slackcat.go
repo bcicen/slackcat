@@ -120,11 +120,15 @@ func main() {
 		},
 		cli.BoolFlag{
 			Name:  "noop",
-			Usage: "Skip posting file to Slack. Useful for testing.",
+			Usage: "Skip posting file to Slack. Useful for testing",
 		},
 		cli.StringFlag{
 			Name:  "channel, c",
 			Usage: "Slack channel to post to",
+		},
+		cli.StringFlag{
+			Name:  "filename, n",
+			Usage: "Filename for upload. Defaults to current timestamp",
 		},
 	}
 
@@ -136,7 +140,10 @@ func main() {
 		}
 
 		tmpPath := readIn(c.Bool("tee"))
-		fileName := strconv.FormatInt(time.Now().Unix(), 10)
+		fileName := c.String("filename")
+		if fileName == "" {
+			fileName = strconv.FormatInt(time.Now().Unix(), 10)
+		}
 
 		err := postToSlack(token, tmpPath.Name(), fileName, c.String("channel"), c.Bool("noop"))
 		failOnError(err, "error uploading file to Slack", true)
