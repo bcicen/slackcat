@@ -36,7 +36,7 @@ func readConfig() string {
 	return lines[0]
 }
 
-func readIn() *os.File {
+func readIn(tee bool) *os.File {
 	var line string
 	var lines []string
 
@@ -51,7 +51,9 @@ func readIn() *os.File {
 			}
 			break
 		}
-		fmt.Println(line)
+		if tee {
+			fmt.Println(line)
+		}
 		lines = append(lines, line)
 	}
 
@@ -107,6 +109,10 @@ func main() {
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
 	app.Flags = []cli.Flag{
+		cli.BoolFlag{
+			Name:  "tee, t",
+			Usage: "Print stdin to screen before posting",
+		},
 		cli.StringFlag{
 			Name:  "channel, c",
 			Usage: "Slack channel to post to",
@@ -120,7 +126,7 @@ func main() {
 			exit(fmt.Errorf("no channel provided!"))
 		}
 
-		tmpPath := readIn()
+		tmpPath := readIn(c.Bool("tee"))
 		fileName := strconv.FormatInt(time.Now().Unix(), 10)
 
 		err := postToSlack(token, tmpPath.Name(), fileName, c.String("channel"))
