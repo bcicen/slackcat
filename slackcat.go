@@ -23,28 +23,17 @@ type Payload struct {
 	filepath string
 }
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		fmt.Println("%s: %s", msg, err)
-		os.Exit(1)
-	}
-}
-
-func getConfigPath() (string, error) {
+func getConfigPath() string {
 	usr, err := user.Current()
-	if err != nil {
-		return "", fmt.Errorf("unable to determine current user")
-	}
-	return usr.HomeDir + "/.slackcat", nil
+	failOnError(err, "unable to determine current user", false)
+
+	return usr.HomeDir + "/.slackcat"
 }
 
-func readConfig() (string, error) {
-	path, err := getConfigPath()
-
+func readConfig() string {
+	path := getConfigPath()
 	file, err := os.Open(path)
-	if err != nil {
-		return "", fmt.Errorf("missing config: %s", path)
-	}
+	failOnError(err, "missing config: "+path, false)
 	defer file.Close()
 
 	var lines []string
@@ -52,7 +41,8 @@ func readConfig() (string, error) {
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
-	return lines[0], nil
+
+	return lines[0]
 }
 
 func readIn() *os.File {
@@ -60,9 +50,7 @@ func readIn() *os.File {
 	var lines []string
 
 	tmp, err := ioutil.TempFile(os.TempDir(), "multivac-")
-	if err != nil {
-		panic(err)
-	}
+	failOnError(err, "failed to create tempfile", false)
 
 	for {
 		_, err := fmt.Scan(&line)
@@ -85,24 +73,42 @@ func readIn() *os.File {
 	return tmp
 }
 
-func postToSlack(token, tmpPath, fileName, channelName string) error {
+func postToSlack(token, path, name, channelName string) error {
+	defer os.Remove(path)
+
 	api := slack.New(token)
 	channel, err := api.FindChannelByName(channelName)
 	if err != nil {
-		return fmt.Errorf("Error uploading file to Slack: %s", err)
+		return err
 	}
 
 	err = api.FilesUpload(&slack.FilesUploadOpt{
-		Filepath: tmpPath,
-		Filename: fileName,
-		Title:    fileName,
+		Filepath: path,
+		Filename: name,
+		Title:    name,
 		Channels: []string{channel.Id},
 	})
 	if err != nil {
-		return fmt.Errorf("Error uploading file to Slack: %s", err)
+		return err
 	}
 
+	fmt.Printf("file %s uploaded to %s\n", name, channelName)
 	return nil
+}
+
+func failOnError(err error, msg string, appendErr bool) {
+	if err != nil {
+		if appendErr {
+			exit(fmt.Errorf("%s:\n%s", msg, err))
+		} else {
+			exit(fmt.Errorf("%s", msg))
+		}
+	}
+}
+
+func exit(err error) {
+	fmt.Println(err)
+	os.Exit(1)
 }
 
 func main() {
@@ -117,26 +123,17 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		if c.String("channel") == "" {
-			panic(fmt.Errorf("no channel provided!"))
-		}
+		token := readConfig()
 
-		token, err := readConfig()
-		if err != nil {
-			panic(err)
+		if c.String("channel") == "" {
+			exit(fmt.Errorf("no channel provided!"))
 		}
 
 		tmpPath := readIn()
 		fileName := strconv.FormatInt(time.Now().Unix(), 10)
 
-		err = postToSlack(token, tmpPath.Name(), fileName, c.String("channel"))
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		os.Remove(tmpPath.Name())
-
+		err := postToSlack(token, tmpPath.Name(), fileName, c.String("channel"))
+		failOnError(err, "error uploading file to Slack", true)
 	}
 
 	app.Run(os.Args)
