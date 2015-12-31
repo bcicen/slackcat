@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	//	"github.com/bluele/slack"
 	"github.com/bluele/slack"
 	"github.com/codegangsta/cli"
 	"io"
@@ -14,14 +13,6 @@ import (
 	"strconv"
 	"time"
 )
-
-var channel string
-
-type Payload struct {
-	token    string
-	filename string
-	filepath string
-}
 
 func getConfigPath() string {
 	usr, err := user.Current()
