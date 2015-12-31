@@ -4,14 +4,43 @@ import (
 	"bufio"
 	"fmt"
 	//	"github.com/bluele/slack"
+	"github.com/bluele/slack"
 	"github.com/codegangsta/cli"
+	"io"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
+	"strconv"
+	"time"
 )
 
 var channel string
 
-func readConfig(path string) (string, error) {
+type Payload struct {
+	token    string
+	filename string
+	filepath string
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		fmt.Println("%s: %s", msg, err)
+		os.Exit(1)
+	}
+}
+
+func getConfigPath() (string, error) {
+	usr, err := user.Current()
+	if err != nil {
+		return "", fmt.Errorf("unable to determine current user")
+	}
+	return usr.HomeDir + "/.slackcat", nil
+}
+
+func readConfig() (string, error) {
+	path, err := getConfigPath()
+
 	file, err := os.Open(path)
 	if err != nil {
 		return "", fmt.Errorf("missing config: %s", path)
@@ -26,13 +55,57 @@ func readConfig(path string) (string, error) {
 	return lines[0], nil
 }
 
-func main() {
-	usr, err := user.Current()
+func readIn() *os.File {
+	var line string
+	var lines []string
+
+	tmp, err := ioutil.TempFile(os.TempDir(), "multivac-")
 	if err != nil {
-		fmt.Println("unable to determine current user")
-		os.Exit(1)
+		panic(err)
 	}
 
+	for {
+		_, err := fmt.Scan(&line)
+		if err != nil {
+			if err != io.EOF {
+				log.Fatal(err)
+			}
+			break
+		}
+		fmt.Println(line)
+		lines = append(lines, line)
+	}
+
+	w := bufio.NewWriter(tmp)
+	for _, line := range lines {
+		fmt.Fprintln(w, line)
+	}
+	w.Flush()
+
+	return tmp
+}
+
+func postToSlack(token, tmpPath, fileName, channelName string) error {
+	api := slack.New(token)
+	channel, err := api.FindChannelByName(channelName)
+	if err != nil {
+		return fmt.Errorf("Error uploading file to Slack: %s", err)
+	}
+
+	err = api.FilesUpload(&slack.FilesUploadOpt{
+		Filepath: tmpPath,
+		Filename: fileName,
+		Title:    fileName,
+		Channels: []string{channel.Id},
+	})
+	if err != nil {
+		return fmt.Errorf("Error uploading file to Slack: %s", err)
+	}
+
+	return nil
+}
+
+func main() {
 	app := cli.NewApp()
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
@@ -45,15 +118,25 @@ func main() {
 
 	app.Action = func(c *cli.Context) {
 		if c.String("channel") == "" {
-			fmt.Println("no channel provided!")
-			os.Exit(1)
+			panic(fmt.Errorf("no channel provided!"))
 		}
-		token, err := readConfig(usr.HomeDir + "/.slackcat")
+
+		token, err := readConfig()
+		if err != nil {
+			panic(err)
+		}
+
+		tmpPath := readIn()
+		fileName := strconv.FormatInt(time.Now().Unix(), 10)
+
+		err = postToSlack(token, tmpPath.Name(), fileName, c.String("channel"))
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		fmt.Println(token)
+
+		os.Remove(tmpPath.Name())
+
 	}
 
 	app.Run(os.Args)
