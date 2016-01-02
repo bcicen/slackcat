@@ -90,7 +90,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
-	app.Version = "0.2"
+	app.Version = "0.3"
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "tee, t",
