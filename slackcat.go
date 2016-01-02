@@ -141,6 +141,7 @@ func main() {
 		if c.Bool("noop") {
 			output(fmt.Sprintf("skipping upload of file %s to %s", fileName, channel.Name))
 		} else {
+			start := time.Now()
 			err = api.FilesUpload(&slack.FilesUploadOpt{
 				Filepath: filePath,
 				Filename: fileName,
@@ -148,7 +149,8 @@ func main() {
 				Channels: []string{channel.Id},
 			})
 			failOnError(err, "error uploading file to Slack", true)
-			output(fmt.Sprintf("file %s uploaded to %s", fileName, channel.Name))
+			duration := strconv.FormatFloat(time.Since(start).Seconds(), 'f', 3, 64)
+			output(fmt.Sprintf("file %s uploaded to %s (%ss)", fileName, channel.Name, duration))
 		}
 	}
 
