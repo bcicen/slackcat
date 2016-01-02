@@ -16,6 +16,29 @@ file bot.png uploaded to general
 
 ## Installing
 
+Download the latest release for your platform:
+
+#### OS X
+
+```bash
+wget https://github.com/bcicen/slackcat/releases/download/v0.2/slackcat-0.2-darwin-amd64 -O slackcat
+sudo mv slackcat /usr/local/bin/
+sudo chmod +x /usr/local/bin/slackcat
+```
+
+#### Linux
+
+```bash
+wget https://github.com/bcicen/slackcat/releases/download/v0.2/slackcat-0.2-linux-amd64 -O slackcat
+sudo mv slackcat /usr/local/bin/
+sudo chmod +x /usr/local/bin/slackcat
+```
+
+and create a Slackcat config file:
+```bash
+echo '<your-slack-token>' > ~/.slackcat
+```
+
 ## Options
 
 Option | Description
@@ -23,4 +46,4 @@ Option | Description
 --tee, -t | Print stdin to screen before posting
 --noop | Skip posting file to Slack. Useful for testing
 --channel, -c | Slack channel to post to
---filename, -n | Filename for upload. Defaults to current timestamp
+--filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin.
