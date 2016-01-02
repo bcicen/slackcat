@@ -7,9 +7,9 @@ import (
 	"github.com/codegangsta/cli"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -36,18 +36,18 @@ func readConfig() string {
 	return lines[0]
 }
 
-func readIn(tee bool) *os.File {
+func readIn(tee bool) string {
 	var line string
 	var lines []string
 
-	tmp, err := ioutil.TempFile(os.TempDir(), "multivac-")
+	tmp, err := ioutil.TempFile(os.TempDir(), "slackcat-")
 	failOnError(err, "failed to create tempfile", false)
 
 	for {
 		_, err := fmt.Scan(&line)
 		if err != nil {
 			if err != io.EOF {
-				log.Fatal(err)
+				exit(err)
 			}
 			break
 		}
@@ -63,12 +63,10 @@ func readIn(tee bool) *os.File {
 	}
 	w.Flush()
 
-	return tmp
+	return tmp.Name()
 }
 
 func postToSlack(token, path, name, channelName string, noop bool) error {
-	defer os.Remove(path)
-
 	api := slack.New(token)
 	channel, err := api.FindChannelByName(channelName)
 	if err != nil {
@@ -133,19 +131,30 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+		var filePath string
+		var fileName string
+
 		token := readConfig()
 
 		if c.String("channel") == "" {
 			exit(fmt.Errorf("no channel provided!"))
 		}
 
-		tmpPath := readIn(c.Bool("tee"))
-		fileName := c.String("filename")
-		if fileName == "" {
+		if len(c.Args()) > 0 {
+			filePath = c.Args()[0]
+			fileName = filepath.Base(filePath)
+		} else {
+			filePath = readIn(c.Bool("tee"))
 			fileName = strconv.FormatInt(time.Now().Unix(), 10)
+			defer os.Remove(filePath)
 		}
 
-		err := postToSlack(token, tmpPath.Name(), fileName, c.String("channel"), c.Bool("noop"))
+		//override default filename with provided option value
+		if c.String("filename") != "" {
+			fileName = c.String("filename")
+		}
+
+		err := postToSlack(token, filePath, fileName, c.String("channel"), c.Bool("noop"))
 		failOnError(err, "error uploading file to Slack", true)
 	}
 
