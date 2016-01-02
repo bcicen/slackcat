@@ -17,7 +17,6 @@ import (
 func getConfigPath() string {
 	usr, err := user.Current()
 	failOnError(err, "unable to determine current user", false)
-
 	return usr.HomeDir + "/.slackcat"
 }
 
@@ -41,7 +40,7 @@ func readIn(tee bool) string {
 	var lines []string
 
 	tmp, err := ioutil.TempFile(os.TempDir(), "slackcat-")
-	failOnError(err, "failed to create tempfile", false)
+	failOnError(err, "unable to create tmpfile", false)
 
 	for {
 		_, err := fmt.Scan(&line)
@@ -64,32 +63,6 @@ func readIn(tee bool) string {
 	w.Flush()
 
 	return tmp.Name()
-}
-
-func postToSlack(token, path, name, channelName string, noop bool) error {
-	api := slack.New(token)
-	channel, err := api.FindChannelByName(channelName)
-	if err != nil {
-		return err
-	}
-
-	if noop {
-		fmt.Printf("skipping upload of file %s to %s\n", name, channel.Name)
-		return nil
-	}
-
-	err = api.FilesUpload(&slack.FilesUploadOpt{
-		Filepath: path,
-		Filename: name,
-		Title:    name,
-		Channels: []string{channel.Id},
-	})
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("file %s uploaded to %s\n", name, channel.Name)
-	return nil
 }
 
 func failOnError(err error, msg string, appendErr bool) {
@@ -136,10 +109,14 @@ func main() {
 		var fileName string
 
 		token := readConfig()
+		api := slack.New(token)
 
 		if c.String("channel") == "" {
 			exit(fmt.Errorf("no channel provided!"))
 		}
+
+		channel, err := api.FindChannelByName(c.String("channel"))
+		failOnError(err, "Slack API error", true)
 
 		if len(c.Args()) > 0 {
 			filePath = c.Args()[0]
@@ -155,8 +132,18 @@ func main() {
 			fileName = c.String("filename")
 		}
 
-		err := postToSlack(token, filePath, fileName, c.String("channel"), c.Bool("noop"))
-		failOnError(err, "error uploading file to Slack", true)
+		if c.Bool("noop") {
+			fmt.Printf("skipping upload of file %s to %s\n", fileName, channel.Name)
+		} else {
+			err = api.FilesUpload(&slack.FilesUploadOpt{
+				Filepath: filePath,
+				Filename: fileName,
+				Title:    fileName,
+				Channels: []string{channel.Id},
+			})
+			failOnError(err, "error uploading file to Slack", true)
+			fmt.Printf("file %s uploaded to %s\n", fileName, channel.Name)
+		}
 	}
 
 	app.Run(os.Args)
