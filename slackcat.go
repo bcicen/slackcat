@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/bluele/slack"
 	"github.com/codegangsta/cli"
+	"github.com/fatih/color"
 	"io"
 	"io/ioutil"
 	"os"
@@ -23,7 +24,7 @@ func getConfigPath() string {
 func readConfig() string {
 	path := getConfigPath()
 	file, err := os.Open(path)
-	failOnError(err, "missing config: "+path, false)
+	failOnError(err, "unable to read config: "+path, false)
 	defer file.Close()
 
 	var lines []string
@@ -65,6 +66,11 @@ func readIn(tee bool) string {
 	return tmp.Name()
 }
 
+func output(s string) {
+	cyan := color.New(color.Bold).SprintFunc()
+	fmt.Printf("%s %s\n", cyan("slackcat"), s)
+}
+
 func failOnError(err error, msg string, appendErr bool) {
 	if err != nil {
 		if appendErr {
@@ -76,7 +82,7 @@ func failOnError(err error, msg string, appendErr bool) {
 }
 
 func exit(err error) {
-	fmt.Println(err)
+	output(color.RedString(err.Error()))
 	os.Exit(1)
 }
 
@@ -133,7 +139,7 @@ func main() {
 		}
 
 		if c.Bool("noop") {
-			fmt.Printf("skipping upload of file %s to %s\n", fileName, channel.Name)
+			output(fmt.Sprintf("skipping upload of file %s to %s", fileName, channel.Name))
 		} else {
 			err = api.FilesUpload(&slack.FilesUploadOpt{
 				Filepath: filePath,
@@ -142,7 +148,7 @@ func main() {
 				Channels: []string{channel.Id},
 			})
 			failOnError(err, "error uploading file to Slack", true)
-			fmt.Printf("file %s uploaded to %s\n", fileName, channel.Name)
+			output(fmt.Sprintf("file %s uploaded to %s", fileName, channel.Name))
 		}
 	}
 
