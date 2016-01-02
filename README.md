@@ -49,5 +49,5 @@ Option | Description
 --- | ---
 --tee, -t | Print stdin to screen before posting
 --noop | Skip posting file to Slack. Useful for testing
---channel, -c | Slack channel to post to
+--channel, -c | Slack channel or group to post to
 --filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin.

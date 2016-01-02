@@ -74,7 +74,7 @@ func output(s string) {
 func failOnError(err error, msg string, appendErr bool) {
 	if err != nil {
 		if appendErr {
-			exit(fmt.Errorf("%s:\n%s", msg, err))
+			exit(fmt.Errorf("%s: %s", msg, err))
 		} else {
 			exit(fmt.Errorf("%s", msg))
 		}
@@ -102,7 +102,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "channel, c",
-			Usage: "Slack channel to post to",
+			Usage: "Slack channel or group to post to",
 		},
 		cli.StringFlag{
 			Name:  "filename, n",
@@ -113,6 +113,7 @@ func main() {
 	app.Action = func(c *cli.Context) {
 		var filePath string
 		var fileName string
+		var channelId string
 
 		token := readConfig()
 		api := slack.New(token)
@@ -122,7 +123,13 @@ func main() {
 		}
 
 		channel, err := api.FindChannelByName(c.String("channel"))
-		failOnError(err, "Slack API error", true)
+		if err != nil {
+			group, err := api.FindGroupByName(c.String("channel"))
+			failOnError(err, "Slack API error", true)
+			channelId = group.Id
+		} else {
+			channelId = channel.Id
+		}
 
 		if len(c.Args()) > 0 {
 			filePath = c.Args()[0]
@@ -139,18 +146,18 @@ func main() {
 		}
 
 		if c.Bool("noop") {
-			output(fmt.Sprintf("skipping upload of file %s to %s", fileName, channel.Name))
+			output(fmt.Sprintf("skipping upload of file %s to %s", fileName, c.String("channel")))
 		} else {
 			start := time.Now()
 			err = api.FilesUpload(&slack.FilesUploadOpt{
 				Filepath: filePath,
 				Filename: fileName,
 				Title:    fileName,
-				Channels: []string{channel.Id},
+				Channels: []string{channelId},
 			})
 			failOnError(err, "error uploading file to Slack", true)
 			duration := strconv.FormatFloat(time.Since(start).Seconds(), 'f', 3, 64)
-			output(fmt.Sprintf("file %s uploaded to %s (%ss)", fileName, channel.Name, duration))
+			output(fmt.Sprintf("file %s uploaded to %s (%ss)", fileName, c.String("channel"), duration))
 		}
 	}
 
