@@ -2,7 +2,7 @@
 Slackcat is a simple commandline utility to post snippets to Slack.
 
 
-  <img width="500px" src="https://raw.githubusercontent.com/bcicen/slackcat/master/demo.gif" alt="slackcat"/>
+  <img width="500px" src="https://raw.githubusercontent.com/vektorlab/slackcat/master/demo.gif" alt="slackcat"/>
 
 
 ## Usage
@@ -25,7 +25,7 @@ Download the latest release for your platform:
 #### OS X
 
 ```bash
-wget https://github.com/bcicen/slackcat/releases/download/v0.4/slackcat-0.4-darwin-amd64 -O slackcat
+wget https://github.com/vektorlab/slackcat/releases/download/v0.4/slackcat-0.4-darwin-amd64 -O slackcat
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -33,7 +33,7 @@ sudo chmod +x /usr/local/bin/slackcat
 #### Linux
 
 ```bash
-wget https://github.com/bcicen/slackcat/releases/download/v0.4/slackcat-0.4-linux-amd64 -O slackcat
+wget https://github.com/vektorlab/slackcat/releases/download/v0.4/slackcat-0.4-linux-amd64 -O slackcat
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
