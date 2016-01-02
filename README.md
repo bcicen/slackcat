@@ -1,9 +1,9 @@
 # slackcat
 Slackcat is a simple commandline utility to post snippets to Slack.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/bcicen/slackcat/master/demo.gif" alt="slackcat"/>
-</p>
+
+  <img width="500px" src="https://raw.githubusercontent.com/bcicen/slackcat/master/demo.gif" alt="slackcat"/>
+
 
 ## Usage
 Pipe command output:
