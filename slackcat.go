@@ -3,9 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/bluele/slack"
-	"github.com/codegangsta/cli"
-	"github.com/fatih/color"
 	"io"
 	"io/ioutil"
 	"os"
@@ -13,6 +10,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"time"
+	
+	"github.com/bluele/slack"
+	"github.com/codegangsta/cli"
+	"github.com/fatih/color"
 )
 
 func getConfigPath() string {
