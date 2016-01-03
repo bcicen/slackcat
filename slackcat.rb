@@ -3,7 +3,7 @@ class Slackcat < Formula
   homepage "https://github.com/vektorlab/slackcat"
   url "https://github.com/vektorlab/slackcat/archive/master.tar.gz"
   version "0.4"
-  sha256 "02c23e8b7bf6a45f85c6911795324a208e1ed9b30b5e9bfb851a74217c68fbbc"
+  sha256 "27fdfe083752f810cc5a8d383093a84556a355a3e1aa54a1ab03f3a183bc6b03"
 
   depends_on "go"
 
