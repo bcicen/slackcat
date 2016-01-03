@@ -8,17 +8,19 @@ class Slackcat < Formula
   depends_on "go"
 
   def install
+    platform = `uname`.downcase.strip
+
     unless ENV['GOPATH']
       ENV['GOPATH'] = "/tmp"
     end
+
     system "make"
-    cp "build/slackcat-0.4-darwin-amd64", "#{HOMEBREW_PREFIX}/bin/"
-    mv "#{HOMEBREW_PREFIX}/bin/slackcat-0.4-darwin-amd64", "#{HOMEBREW_PREFIX}/bin/slackcat"
-    chmod "u+x", "#{HOMEBREW_PREFIX}/bin/slackcat"
+    bin.install "build/slackcat-0.4-#{platform}-amd64" => "slackcat"
+
     puts "Ready to go! Now just put your key in ~/.slackcat."
   end
 
   test do
-    File.exist? "#{HOMEBREW_PREFIX}/bin/slackcat"
+      assert_equal(0, "/usr/local/bin/slackcat")
   end
 end
