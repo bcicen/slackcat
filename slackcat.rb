@@ -10,8 +10,8 @@ class Slackcat < Formula
   def install
     platform = `uname`.downcase.strip
 
-    unless ENV['GOPATH']
-      ENV['GOPATH'] = "/tmp"
+    unless ENV["GOPATH"]
+      ENV["GOPATH"] = "/tmp"
     end
 
     system "make"
@@ -21,6 +21,6 @@ class Slackcat < Formula
   end
 
   test do
-      assert_equal(0, "/usr/local/bin/slackcat")
+    assert_equal(0, "/usr/local/bin/slackcat")
   end
 end
