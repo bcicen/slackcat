@@ -38,7 +38,15 @@ sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
 
-and create a Slackcat config file:
+## Configuration
+
+Generate a new Slack token with:
+```bash
+slackcat --configure
+``` 
+A new browser window will be opened for you to confirm the request via Slack, and you'll be returned a token.
+
+Create a Slackcat config file and you're ready to go!
 ```bash
 echo '<your-slack-token>' > ~/.slackcat
 ```
