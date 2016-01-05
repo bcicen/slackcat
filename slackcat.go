@@ -16,6 +16,12 @@ import (
 	"time"
 )
 
+const (
+	base_url  = "https://slack.com/oauth/authorize"
+	client_id = "7065709201.17699618306"
+	scope     = "channels%3Aread+groups%3Aread+im%3Aread+users%3Aread+chat%3Awrite%3Auser+files%3Awrite%3Auser+files%3Aread"
+)
+
 func getConfigPath() string {
 	usr, err := user.Current()
 	failOnError(err, "unable to determine current user", true)
@@ -38,11 +44,8 @@ func readConfig() string {
 }
 
 func configureOA() {
-	scope := "channels%3Aread+groups%3Aread+im%3Aread+users%3Aread+chat%3Awrite%3Auser+files%3Awrite%3Auser+files%3Aread"
-	client_id := "7065709201.17699618306"
-	base_url := "https://slack.com/oauth/authorize"
 	oa_url := base_url + "?scope=" + scope + "&client_id=" + client_id
-	output("Authenticating Slackcat")
+	output("Creating token request for Slackcat")
 	err := open.Run(oa_url)
 	if err != nil {
 		output("Please open the below URL in your browser to authorize SlackCat")
