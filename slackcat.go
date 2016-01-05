@@ -6,6 +6,7 @@ import (
 	"github.com/bluele/slack"
 	"github.com/codegangsta/cli"
 	"github.com/fatih/color"
+	"github.com/skratchdot/open-golang/open"
 	"io"
 	"io/ioutil"
 	"os"
@@ -17,14 +18,14 @@ import (
 
 func getConfigPath() string {
 	usr, err := user.Current()
-	failOnError(err, "unable to determine current user", false)
+	failOnError(err, "unable to determine current user", true)
 	return usr.HomeDir + "/.slackcat"
 }
 
 func readConfig() string {
 	path := getConfigPath()
 	file, err := os.Open(path)
-	failOnError(err, "unable to read config: "+path, false)
+	failOnError(err, "unable to read config", true)
 	defer file.Close()
 
 	var lines []string
@@ -34,6 +35,24 @@ func readConfig() string {
 	}
 
 	return lines[0]
+}
+
+func configureOA() {
+	scope := "channels%3Aread+groups%3Aread+im%3Aread+users%3Aread+chat%3Awrite%3Auser+files%3Awrite%3Auser+files%3Aread"
+	client_id := "7065709201.17699618306"
+	base_url := "https://slack.com/oauth/authorize"
+	oa_url := base_url + "?scope=" + scope + "&client_id=" + client_id
+	output("Authenticating Slackcat")
+	err := open.Run(oa_url)
+	if err != nil {
+		output("Please open the below URL in your browser to authorize SlackCat")
+		output(oa_url)
+	}
+	//	_, err := fmt.Scanf("%s", &i)
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	failOnError(err, "", true)
+	fmt.Println(dir)
+	os.Exit(0)
 }
 
 func readIn(tee bool) string {
@@ -100,6 +119,10 @@ func main() {
 			Name:  "noop",
 			Usage: "Skip posting file to Slack. Useful for testing",
 		},
+		cli.BoolFlag{
+			Name:  "configure",
+			Usage: "Configure Slackcat via oauth",
+		},
 		cli.StringFlag{
 			Name:  "channel, c",
 			Usage: "Slack channel or group to post to",
@@ -114,6 +137,10 @@ func main() {
 		var filePath string
 		var fileName string
 		var channelId string
+
+		if c.Bool("configure") {
+			configureOA()
+		}
 
 		token := readConfig()
 		api := slack.New(token)
