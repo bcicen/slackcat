@@ -17,11 +17,11 @@ release:
 arch-release:
 	rm -rf arch-release && mkdir -p arch-release
 	go get github.com/seletskiy/go-makepkg/...
-	cd arch-release
-	go-makepkg -p version "Commandline utility for posting snippets to Slack" git://github.com/vektorlab/slackcat.git
-	git clone ssh://aur@aur.archlinux.org/slackcat.git
-	cp build/* slackcat/
-	cd slackcat/
-	git commit -a -m "Update to $(VERSION)"
+	cd arch-release && \
+		go-makepkg -p version "Commandline utility for posting snippets to Slack" git://github.com/vektorlab/slackcat.git; \
+		git clone ssh://aur@aur.archlinux.org/slackcat.git; \
+		cp build/* slackcat/
+	cd arch-release/slackcat/ && \
+		git commit -a -m "Update to $(VERSION)"
 
 .PHONY: release arch-release
