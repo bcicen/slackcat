@@ -16,6 +16,8 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
+var version = "0.6"
+
 const (
 	base_url  = "https://slack.com/oauth/authorize"
 	client_id = "7065709201.17699618306"
@@ -107,7 +109,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
-	app.Version = "0.6"
+	app.Version = version
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "tee, t",
