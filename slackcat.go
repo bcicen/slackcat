@@ -3,14 +3,13 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
 	"strconv"
 	"time"
-	
+
 	"github.com/bluele/slack"
 	"github.com/codegangsta/cli"
 	"github.com/fatih/color"
@@ -59,29 +58,24 @@ func configureOA() {
 	os.Exit(0)
 }
 
-func readIn(tee bool) string {
-	var line string
-	var lines []string
+func readIn(lines chan string, tee bool) {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		lines <- scanner.Text()
+		if tee {
+			fmt.Println(scanner.Text())
+		}
+	}
+	close(lines)
+}
 
+func writeTemp(lines chan string) string {
 	tmp, err := ioutil.TempFile(os.TempDir(), "slackcat-")
 	failOnError(err, "unable to create tmpfile", false)
 
-	for {
-		_, err := fmt.Scan(&line)
-		if err != nil {
-			if err != io.EOF {
-				exit(err)
-			}
-			break
-		}
-		if tee {
-			fmt.Println(line)
-		}
-		lines = append(lines, line)
-	}
-
 	w := bufio.NewWriter(tmp)
-	for _, line := range lines {
+	for line := range lines {
 		fmt.Fprintln(w, line)
 	}
 	w.Flush()
@@ -113,7 +107,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
-	app.Version = "0.5"
+	app.Version = "0.6"
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "tee, t",
@@ -166,7 +160,9 @@ func main() {
 			filePath = c.Args()[0]
 			fileName = filepath.Base(filePath)
 		} else {
-			filePath = readIn(c.Bool("tee"))
+			lines := make(chan string)
+			go readIn(lines, c.Bool("tee"))
+			filePath = writeTemp(lines)
 			fileName = strconv.FormatInt(time.Now().Unix(), 10)
 			defer os.Remove(filePath)
 		}
