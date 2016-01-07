@@ -1,9 +1,9 @@
 class Slackcat < Formula
   desc "Simple command-line Utility to post snippets to Slack."
   homepage "https://github.com/vektorlab/slackcat"
-  url "https://github.com/vektorlab/slackcat/archive/master.tar.gz"
-  version "0.4"
-  sha256 "27fdfe083752f810cc5a8d383093a84556a355a3e1aa54a1ab03f3a183bc6b03"
+  url "https://github.com/vektorlab/slackcat/archive/v0.6.tar.gz"
+  version "0.6"
+  sha256 "58beac16e8949a793400025ea3ce159220f21cbf3f92bf8e5530d7662d3132e9"
 
   depends_on "go"
 
@@ -15,9 +15,9 @@ class Slackcat < Formula
     end
 
     system "make"
-    bin.install "build/slackcat-0.4-#{platform}-amd64" => "slackcat"
+    bin.install "build/slackcat-0.6-#{platform}-amd64" => "slackcat"
 
-    puts "Ready to go! Now just put your key in ~/.slackcat."
+    puts "Ready to go! Generate a new Slack key with 'slackcat --configure'"
   end
 
   test do
