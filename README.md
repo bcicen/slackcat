@@ -25,7 +25,7 @@ Download the latest release for your platform:
 #### OS X
 
 ```bash
-wget https://github.com/vektorlab/slackcat/releases/download/v0.7/slackcat-0.7-darwin-amd64 -O slackcat
+curl -sLo slackcat https://github.com/vektorlab/slackcat/releases/download/v0.7/slackcat-0.7-darwin-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
