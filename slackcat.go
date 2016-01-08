@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/user"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -25,9 +24,11 @@ const (
 )
 
 func getConfigPath() string {
-	usr, err := user.Current()
-	failOnError(err, "unable to determine current user", true)
-	return usr.HomeDir + "/.slackcat"
+	homedir := os.Getenv("HOME")
+	if homedir == "" {
+		exit(fmt.Errorf("$HOME not set"))
+	}
+	return homedir + "/.slackcat"
 }
 
 func readConfig() string {
