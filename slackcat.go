@@ -16,7 +16,7 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-var version = "0.6"
+var version = "dev-build"
 
 const (
 	base_url  = "https://slack.com/oauth/authorize"

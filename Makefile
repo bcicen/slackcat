@@ -4,8 +4,8 @@ VERSION=$(shell cat VERSION)
 build:
 	mkdir -p build
 	go get -v -d
-	GOOS=darwin GOARCH=amd64 go build -o build/slackcat-$(VERSION)-darwin-amd64
-	GOOS=linux GOARCH=amd64 go build -o build/slackcat-$(VERSION)-linux-amd64
+	GOOS=darwin GOARCH=amd64 go build -ldflags "-s -X main.version=$(VERSION)" -o build/slackcat-$(VERSION)-darwin-amd64
+	GOOS=linux GOARCH=amd64 go build -ldflags "-s -X main.version=$(VERSION)" -o build/slackcat-$(VERSION)-linux-amd64
 
 release:
 	rm -rf release && mkdir release
