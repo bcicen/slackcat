@@ -25,7 +25,7 @@ Download the latest release for your platform:
 #### OS X
 
 ```bash
-curl -sLo slackcat https://github.com/vektorlab/slackcat/releases/download/v0.7/slackcat-0.7-darwin-amd64
+curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v0.7/slackcat-0.7-darwin-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -43,7 +43,7 @@ sudo chmod +x /usr/local/bin/slackcat
 Generate a new Slack token with:
 ```bash
 slackcat --configure
-``` 
+```
 A new browser window will be opened for you to confirm the request via Slack, and you'll be returned a token.
 
 Create a Slackcat config file and you're ready to go!
