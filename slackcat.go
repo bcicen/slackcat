@@ -61,6 +61,23 @@ func configureOA() {
 	os.Exit(0)
 }
 
+//Lookup Slack id for channel, group, or im
+func lookupSlackId(api *slack.Slack, name string) (string, error) {
+	channel, err := api.FindChannelByName(name)
+	if err == nil {
+		return channel.Id, nil
+	}
+	group, err := api.FindGroupByName(name)
+	if err == nil {
+		return group.Id, nil
+	}
+	im, err := api.FindImByName(name)
+	if err == nil {
+		return im.Id, nil
+	}
+	return "", fmt.Errorf("No such channel, group, or im")
+}
+
 func readIn(lines chan string, tee bool) {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(bufio.ScanLines)
@@ -137,7 +154,6 @@ func main() {
 	app.Action = func(c *cli.Context) {
 		var filePath string
 		var fileName string
-		var channelId string
 
 		if c.Bool("configure") {
 			configureOA()
@@ -150,14 +166,8 @@ func main() {
 			exit(fmt.Errorf("no channel provided!"))
 		}
 
-		channel, err := api.FindChannelByName(c.String("channel"))
-		if err != nil {
-			group, err := api.FindGroupByName(c.String("channel"))
-			failOnError(err, "Slack API error", true)
-			channelId = group.Id
-		} else {
-			channelId = channel.Id
-		}
+		channelId, err := lookupSlackId(api, c.String("channel"))
+		failOnError(err, "", true)
 
 		if len(c.Args()) > 0 {
 			filePath = c.Args()[0]
