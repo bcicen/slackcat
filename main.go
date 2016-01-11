@@ -19,14 +19,13 @@ var version = "dev-build"
 
 type SlackCat struct {
 	api         *slack.Slack
-	channelId   string
 	channelName string
+	channelId   string
 }
 
 func NewSlackCat(token, channelName string) (*SlackCat, error) {
 	sc := &SlackCat{
 		api:         slack.New(token),
-		channelId:   "",
 		channelName: channelName,
 	}
 	err := sc.lookupSlackId()
@@ -54,33 +53,37 @@ func (sc *SlackCat) lookupSlackId() error {
 		sc.channelId = im.Id
 		return nil
 	}
+	fmt.Println(err)
 	return fmt.Errorf("No such channel, group, or im")
 }
 
 func (sc *SlackCat) stream(lines chan string, noop bool) {
 	msglines := []string{}
 	lastMsg := time.Now()
+	opts := &slack.ChatPostMessageOpt{
+		AsUser: true,
+	}
 	for line := range lines {
 		msglines = append(msglines, line)
 		if time.Since(lastMsg).Seconds() > 3 {
-			sc.postMsg(msglines, noop)
+			sc.postMsg(opts, msglines, noop)
 			msglines = []string{}
 			lastMsg = time.Now()
 		}
 	}
 	//post remaining lines
-	sc.postMsg(msglines, noop)
+	sc.postMsg(opts, msglines, noop)
 	return
 }
 
-func (sc *SlackCat) postMsg(l []string, noop bool) {
+func (sc *SlackCat) postMsg(opts *slack.ChatPostMessageOpt, l []string, noop bool) {
 	msg := fmt.Sprintf("```%s```", strings.Join(l, "\n"))
 	if noop {
-		output(fmt.Sprintf("skipped posting of %s message lines to %s", len(l), sc.channelName))
+		output(fmt.Sprintf("skipped posting of %s message lines to %s", strconv.Itoa(len(l)), sc.channelName))
 	} else {
-		err := sc.api.ChatPostMessage(sc.channelId, msg, nil)
+		err := sc.api.ChatPostMessage(sc.channelId, msg, opts)
 		failOnError(err, "", true)
-		output(fmt.Sprintf("posted %s message lines to %s", len(l), sc.channelName))
+		output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(l)), sc.channelName))
 	}
 }
 
