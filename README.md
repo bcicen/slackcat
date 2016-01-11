@@ -53,7 +53,7 @@ $ slackcat --channel general /home/user/bot.png
 
 Stream input continously as a formatted message:
 ```bash
-$ tail -f /path/to/log | slackcat --channel general --stream
+$ tail -F -n0 /path/to/log | slackcat --channel general --stream
 *slackcat* posted 5 message lines to general
 *slackcat* posted 2 message lines to general
 ...
