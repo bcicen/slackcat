@@ -5,19 +5,6 @@ Slackcat is a simple commandline utility to post snippets to Slack.
   <img width="500px" src="https://raw.githubusercontent.com/vektorlab/slackcat/master/demo.gif" alt="slackcat"/>
 
 
-## Usage
-Pipe command output:
-```bash
-$ echo -e "hi\nthere" | slackcat --channel general --filename hello
-file hello uploaded to general
-```
-
-Post an existing file:
-```bash
-$ slackcat -c general /home/user/bot.png
-file bot.png uploaded to general
-```
-
 ## Installing
 
 Download the latest release for your platform:
@@ -49,6 +36,27 @@ A new browser window will be opened for you to confirm the request via Slack, an
 Create a Slackcat config file and you're ready to go!
 ```bash
 echo '<your-slack-token>' > ~/.slackcat
+```
+
+## Usage
+Pipe command output as a text snippet:
+```bash
+$ echo -e "hi\nthere" | slackcat --channel general --filename hello
+*slackcat* file hello uploaded to general
+```
+
+Post an existing file:
+```bash
+$ slackcat --channel general /home/user/bot.png
+*slackcat* file bot.png uploaded to general
+```
+
+Stream input continously as a formatted message:
+```bash
+$ tail -f /path/to/log | slackcat --channel general --stream
+*slackcat* posted 5 message lines to general
+*slackcat* posted 2 message lines to general
+...
 ```
 
 ## Options
