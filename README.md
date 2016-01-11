@@ -12,7 +12,7 @@ Download the latest release for your platform:
 #### OS X
 
 ```bash
-curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v0.7/slackcat-0.7-darwin-amd64
+curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v0.8/slackcat-0.8-darwin-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -20,7 +20,7 @@ sudo chmod +x /usr/local/bin/slackcat
 #### Linux
 
 ```bash
-wget https://github.com/vektorlab/slackcat/releases/download/v0.7/slackcat-0.7-linux-amd64 -O slackcat
+wget https://github.com/vektorlab/slackcat/releases/download/v0.8/slackcat-0.8-linux-amd64 -O slackcat
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
