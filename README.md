@@ -64,6 +64,8 @@ $ tail -F -n0 /path/to/log | slackcat --channel general --stream
 Option | Description
 --- | ---
 --tee, -t | Print stdin to screen before posting
+--stream, -s | Stream messages to Slack continuously instead of uploading a single snippet
 --noop | Skip posting file to Slack. Useful for testing
---channel, -c | Slack channel or group to post to
+--configure | Configure Slackcat via oauth
+--channel, -c | Slack channel, group, or user to post to
 --filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin.
