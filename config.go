@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/skratchdot/open-golang/open"
 )
@@ -22,19 +23,34 @@ func getConfigPath() string {
 	return homedir + "/.slackcat"
 }
 
-func readConfig() string {
+func getToken(teamName string) string {
+	token := readConfig()[teamName]
+	if token == "" {
+		exitErr(fmt.Errorf("no such team configured: %s", teamName))
+	}
+	return token
+}
+
+func readConfig() map[string]string {
+	var line string
+
 	path := getConfigPath()
 	file, err := os.Open(path)
 	failOnError(err, "unable to read config", true)
 	defer file.Close()
 
-	var lines []string
+	teams := make(map[string]string)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+		line = scanner.Text()
+		if strings.Contains(line, ":") {
+			s := strings.Split(line, ":")
+			teams[s[0]] = strings.Replace(s[1], " ", "", -1)
+		} else {
+			teams["default"] = line
+		}
 	}
-
-	return lines[0]
+	return teams
 }
 
 func configureOA() {

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/fatih/color"
@@ -91,19 +92,31 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+		var token string
+
 		if c.Bool("configure") {
 			configureOA()
 			os.Exit(0)
 		}
 
-		token := readConfig()
-		fileName := c.String("filename")
-
-		if c.String("channel") == "" {
+		channel := c.String("channel")
+		if channel == "" {
 			exitErr(fmt.Errorf("no channel provided!"))
 		}
 
-		slackcat, err := newSlackCat(token, c.String("channel"))
+		if strings.Contains(channel, ":") {
+			s := strings.Split(channel, ":")
+			token = getToken(s[0])
+			channel = s[1]
+		} else {
+			token = getToken("default")
+		}
+		fmt.Println(token)
+		fmt.Println(channel)
+
+		fileName := c.String("filename")
+
+		slackcat, err := newSlackCat(token, channel)
 		failOnError(err, "Slack API Error", true)
 
 		if len(c.Args()) > 0 {

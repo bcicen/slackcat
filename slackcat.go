@@ -118,6 +118,7 @@ func (sc *SlackCat) postFile(filePath, fileName string, noop bool) {
 
 	if noop {
 		output(fmt.Sprintf("skipping upload of file %s to %s", fileName, sc.channelName))
+		return
 	}
 
 	start := time.Now()
