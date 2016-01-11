@@ -17,7 +17,7 @@ const (
 func getConfigPath() string {
 	homedir := os.Getenv("HOME")
 	if homedir == "" {
-		exit(fmt.Errorf("$HOME not set"))
+		exitErr(fmt.Errorf("$HOME not set"))
 	}
 	return homedir + "/.slackcat"
 }

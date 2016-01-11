@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -19,20 +20,52 @@ var version = "dev-build"
 
 type SlackCat struct {
 	api         *slack.Slack
+	opts        *slack.ChatPostMessageOpt
+	queue       *StreamQ
+	shutdown    chan os.Signal
 	channelName string
 	channelId   string
 }
 
-func NewSlackCat(token, channelName string) (*SlackCat, error) {
+func newSlackCat(token, channelName string) (*SlackCat, error) {
 	sc := &SlackCat{
 		api:         slack.New(token),
+		opts:        &slack.ChatPostMessageOpt{AsUser: true},
+		queue:       newStreamQ(),
+		shutdown:    make(chan os.Signal, 1),
 		channelName: channelName,
 	}
 	err := sc.lookupSlackId()
 	if err != nil {
 		return nil, err
 	}
+	signal.Notify(sc.shutdown, os.Interrupt)
 	return sc, nil
+}
+
+func (sc *SlackCat) trap() {
+	sigcount := 0
+	for sig := range sc.shutdown {
+		if sigcount > 0 {
+			output("abort")
+			os.Exit(0)
+		}
+		output(fmt.Sprintf("got signal: %s", sig.String()))
+		output("press ctrl+c again to exit immediately")
+		sigcount++
+		go sc.exit()
+	}
+}
+
+func (sc *SlackCat) exit() {
+	for {
+		if sc.queue.isEmpty() {
+			os.Exit(0)
+		} else {
+			output("flushing remaining messages to Slack...")
+			time.Sleep(3 * time.Second)
+		}
+	}
 }
 
 //Lookup Slack id for channel, group, or im
@@ -57,34 +90,31 @@ func (sc *SlackCat) lookupSlackId() error {
 	return fmt.Errorf("No such channel, group, or im")
 }
 
-func (sc *SlackCat) stream(lines chan string, noop bool) {
-	msglines := []string{}
-	lastMsg := time.Now()
-	opts := &slack.ChatPostMessageOpt{
-		AsUser: true,
-	}
+func (sc *SlackCat) addToStreamQ(lines chan string) {
 	for line := range lines {
-		msglines = append(msglines, line)
-		if time.Since(lastMsg).Seconds() > 3 {
-			sc.postMsg(opts, msglines, noop)
-			msglines = []string{}
-			lastMsg = time.Now()
-		}
+		sc.queue.add(line)
 	}
-	//post remaining lines
-	sc.postMsg(opts, msglines, noop)
-	return
+	sc.exit()
 }
 
-func (sc *SlackCat) postMsg(opts *slack.ChatPostMessageOpt, l []string, noop bool) {
-	msg := fmt.Sprintf("```%s```", strings.Join(l, "\n"))
-	if noop {
-		output(fmt.Sprintf("skipped posting of %s message lines to %s", strconv.Itoa(len(l)), sc.channelName))
-	} else {
-		err := sc.api.ChatPostMessage(sc.channelId, msg, opts)
-		failOnError(err, "", true)
-		output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(l)), sc.channelName))
+func (sc *SlackCat) processStreamQ(noop bool) {
+	if !(sc.queue.isEmpty()) {
+		msglines := sc.queue.flush()
+		if noop {
+			output(fmt.Sprintf("skipped posting of %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
+		} else {
+			sc.postMsg(msglines)
+		}
 	}
+	time.Sleep(3 * time.Second)
+	sc.processStreamQ(noop)
+}
+
+func (sc *SlackCat) postMsg(msglines []string) {
+	msg := fmt.Sprintf("```%s```", strings.Join(msglines, "\n"))
+	err := sc.api.ChatPostMessage(sc.channelId, msg, sc.opts)
+	failOnError(err, "", true)
+	output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
 }
 
 func (sc *SlackCat) postFile(filePath, fileName string, noop bool) {
@@ -144,14 +174,14 @@ func output(s string) {
 func failOnError(err error, msg string, appendErr bool) {
 	if err != nil {
 		if appendErr {
-			exit(fmt.Errorf("%s: %s", msg, err))
+			exitErr(fmt.Errorf("%s: %s", msg, err))
 		} else {
-			exit(fmt.Errorf("%s", msg))
+			exitErr(fmt.Errorf("%s", msg))
 		}
 	}
 }
 
-func exit(err error) {
+func exitErr(err error) {
 	output(color.RedString(err.Error()))
 	os.Exit(1)
 }
@@ -197,10 +227,10 @@ func main() {
 		fileName := c.String("filename")
 
 		if c.String("channel") == "" {
-			exit(fmt.Errorf("no channel provided!"))
+			exitErr(fmt.Errorf("no channel provided!"))
 		}
 
-		slackcat, err := NewSlackCat(token, c.String("channel"))
+		slackcat, err := newSlackCat(token, c.String("channel"))
 		failOnError(err, "Slack API Error", true)
 
 		if len(c.Args()) > 0 {
@@ -219,7 +249,10 @@ func main() {
 
 		if c.Bool("stream") {
 			output("starting stream")
-			slackcat.stream(lines, c.Bool("noop"))
+			go slackcat.addToStreamQ(lines)
+			go slackcat.processStreamQ(c.Bool("noop"))
+			go slackcat.trap()
+			select {}
 		} else {
 			filePath := writeTemp(lines)
 			defer os.Remove(filePath)
