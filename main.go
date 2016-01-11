@@ -95,7 +95,7 @@ func (sc *SlackCat) postFile(filePath, fileName string, noop bool) {
 
 	if noop {
 		output(fmt.Sprintf("skipping upload of file %s to %s", fileName, sc.channelName))
-		return
+		os.Exit(0)
 	}
 
 	start := time.Now()
@@ -189,8 +189,6 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		var filePath string
-
 		if c.Bool("configure") {
 			configureOA()
 		}
@@ -209,10 +207,11 @@ func main() {
 			if c.Bool("stream") {
 				output("filepath provided, ignoring stream option")
 			}
+			filePath := c.Args()[0]
 			if fileName == "" {
 				fileName = filepath.Base(filePath)
 			}
-			slackcat.postFile(c.Args()[0], fileName, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, c.Bool("noop"))
 		}
 
 		lines := make(chan string)
@@ -222,7 +221,7 @@ func main() {
 			output("starting stream")
 			slackcat.stream(lines, c.Bool("noop"))
 		} else {
-			filePath = writeTemp(lines)
+			filePath := writeTemp(lines)
 			defer os.Remove(filePath)
 			slackcat.postFile(filePath, fileName, c.Bool("noop"))
 		}
