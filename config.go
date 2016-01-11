@@ -45,5 +45,4 @@ func configureOA() {
 		output("Please open the below URL in your browser to authorize SlackCat")
 		output(oa_url)
 	}
-	os.Exit(0)
 }
