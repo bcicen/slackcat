@@ -11,6 +11,10 @@ Download the latest release for your platform:
 
 #### OS X
 
+```brew
+brew install slackcat
+```
+or
 ```bash
 curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v0.8/slackcat-0.8-darwin-amd64
 sudo mv slackcat /usr/local/bin/
