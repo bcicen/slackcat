@@ -90,21 +90,25 @@ func (sc *SlackCat) addToStreamQ(lines chan string) {
 }
 
 //TODO: handle messages with length exceeding maximum for Slack chat
-func (sc *SlackCat) processStreamQ(noop bool) {
+func (sc *SlackCat) processStreamQ(noop bool, plain bool) {
 	if !(sc.queue.isEmpty()) {
 		msglines := sc.queue.flush()
 		if noop {
 			output(fmt.Sprintf("skipped posting of %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
 		} else {
-			sc.postMsg(msglines)
+			sc.postMsg(msglines, plain)
 		}
 	}
 	time.Sleep(3 * time.Second)
-	sc.processStreamQ(noop)
+	sc.processStreamQ(noop, plain)
 }
 
-func (sc *SlackCat) postMsg(msglines []string) {
-	msg := fmt.Sprintf("```%s```", strings.Join(msglines, "\n"))
+func (sc *SlackCat) postMsg(msglines []string, plain bool) {
+	fmtStr := "```%s```"
+	if plain {
+		fmtStr = "%s"
+	}
+	msg := fmt.Sprintf(fmtStr, strings.Join(msglines, "\n"))
 	err := sc.api.ChatPostMessage(sc.channelId, msg, sc.opts)
 	failOnError(err, "", true)
 	output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))

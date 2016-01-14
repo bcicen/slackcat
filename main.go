@@ -73,6 +73,10 @@ func main() {
 			Usage: "Stream messages to Slack continuously instead of uploading a single snippet",
 		},
 		cli.BoolFlag{
+			Name:  "plain, p",
+			Usage: "Write messages as plain texts instead of code blocks",
+		},
+		cli.BoolFlag{
 			Name:  "noop",
 			Usage: "Skip posting file to Slack. Useful for testing",
 		},
@@ -103,6 +107,10 @@ func main() {
 			exitErr(fmt.Errorf("no channel provided!"))
 		}
 
+		if !c.Bool("stream") && c.Bool("plain") {
+			exitErr(fmt.Errorf("'plain' flag requires 'stream' mode!"))
+		}
+
 		slackcat, err := newSlackCat(token, c.String("channel"))
 		failOnError(err, "Slack API Error", true)
 
@@ -124,7 +132,7 @@ func main() {
 		if c.Bool("stream") {
 			output("starting stream")
 			go slackcat.addToStreamQ(lines)
-			go slackcat.processStreamQ(c.Bool("noop"))
+			go slackcat.processStreamQ(c.Bool("noop"), c.Bool("plain"))
 			go slackcat.trap()
 			select {}
 		} else {
