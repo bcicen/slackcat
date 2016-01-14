@@ -69,6 +69,7 @@ Option | Description
 --- | ---
 --tee, -t | Print stdin to screen before posting
 --stream, -s | Stream messages to Slack continuously instead of uploading a single snippet
+--plain, -p | When streaming, write messages as plain text instead of code blocks
 --noop | Skip posting file to Slack. Useful for testing
 --configure | Configure Slackcat via oauth
 --channel, -c | Slack channel, group, or user to post to
