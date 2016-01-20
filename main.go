@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/fatih/color"
@@ -74,6 +73,10 @@ func main() {
 			Usage: "Stream messages to Slack continuously instead of uploading a single snippet",
 		},
 		cli.BoolFlag{
+			Name:  "plain, p",
+			Usage: "Write messages as plain texts instead of code blocks",
+		},
+		cli.BoolFlag{
 			Name:  "noop",
 			Usage: "Skip posting file to Slack. Useful for testing",
 		},
@@ -92,31 +95,23 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		var token string
-
 		if c.Bool("configure") {
 			configureOA()
 			os.Exit(0)
 		}
 
-		channel := c.String("channel")
-		if channel == "" {
+		token := readConfig()
+		fileName := c.String("filename")
+
+		if c.String("channel") == "" {
 			exitErr(fmt.Errorf("no channel provided!"))
 		}
 
-		if strings.Contains(channel, ":") {
-			s := strings.Split(channel, ":")
-			token = getToken(s[0])
-			channel = s[1]
-		} else {
-			token = getToken("default")
+		if !c.Bool("stream") && c.Bool("plain") {
+			exitErr(fmt.Errorf("'plain' flag requires 'stream' mode!"))
 		}
-		fmt.Println(token)
-		fmt.Println(channel)
 
-		fileName := c.String("filename")
-
-		slackcat, err := newSlackCat(token, channel)
+		slackcat, err := newSlackCat(token, c.String("channel"))
 		failOnError(err, "Slack API Error", true)
 
 		if len(c.Args()) > 0 {
@@ -137,7 +132,7 @@ func main() {
 		if c.Bool("stream") {
 			output("starting stream")
 			go slackcat.addToStreamQ(lines)
-			go slackcat.processStreamQ(c.Bool("noop"))
+			go slackcat.processStreamQ(c.Bool("noop"), c.Bool("plain"))
 			go slackcat.trap()
 			select {}
 		} else {
