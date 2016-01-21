@@ -100,18 +100,21 @@ func main() {
 			os.Exit(0)
 		}
 
-		token := readConfig()
+		config := readConfig()
 		fileName := c.String("filename")
+		team, channel, err := config.parseChannelOpt(c.String("channel"))
+		failOnError(err, "", true)
 
-		if c.String("channel") == "" {
-			exitErr(fmt.Errorf("no channel provided!"))
+		token := config.teams[team]
+		if token == "" {
+			exitErr(fmt.Errorf("no such team: %s", team))
 		}
 
 		if !c.Bool("stream") && c.Bool("plain") {
 			exitErr(fmt.Errorf("'plain' flag requires 'stream' mode!"))
 		}
 
-		slackcat, err := newSlackCat(token, c.String("channel"))
+		slackcat, err := newSlackCat(token, channel)
 		failOnError(err, "Slack API Error", true)
 
 		if len(c.Args()) > 0 {
