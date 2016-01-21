@@ -5,7 +5,7 @@ Slackcat is a simple commandline utility to post snippets to Slack.
   <img width="500px" src="https://raw.githubusercontent.com/vektorlab/slackcat/master/demo.gif" alt="slackcat"/>
 
 
-## Installing
+## Quickstart
 
 Download the latest release for your platform:
 
@@ -41,6 +41,8 @@ Create a Slackcat config file and you're ready to go!
 ```bash
 echo '<your-slack-token>' > ~/.slackcat
 ```
+
+For configuring multiple teams and default channels, see [Configuration Guide](https://github.com/vektorlab/slackcat/blob/master/docs/configuration-guide.md).
 
 ## Usage
 Pipe command output as a text snippet:
