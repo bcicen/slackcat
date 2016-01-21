@@ -7,6 +7,7 @@ Slackcat is a simple commandline utility to post snippets to Slack.
 
 ## Quickstart
 
+### Installing
 Download the latest release for your platform:
 
 #### OS X
@@ -29,7 +30,7 @@ sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
 
-## Configuration
+### Configuration
 
 Generate a new Slack token with:
 ```bash
