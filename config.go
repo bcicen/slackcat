@@ -58,23 +58,29 @@ func readConfig() *Config {
 	if len(lines) == 1 {
 		config.teams["default"] = lines[0]
 		config.defaultTeam = "default"
-	} else {
-		for _, line := range lines {
-			s := strings.Split(line, "=")
-			if len(s) != 2 {
-				exitErr(fmt.Errorf("failed to parse config at: %s", line))
-			}
-			switch s[0] {
-			case "default_team":
-				config.defaultTeam = s[1]
-			case "default_channel":
-				config.defaultChannel = s[1]
-			default:
-				config.teams[s[0]] = strings.Replace(s[1], " ", "", -1) //strip whitespace
-			}
+		return config
+	}
+
+	for _, line := range lines {
+		s := strings.Split(line, "=")
+		if len(s) != 2 {
+			exitErr(fmt.Errorf("failed to parse config at: %s", line))
+		}
+		key := strip(s[0])
+		switch key {
+		case "default_team":
+			config.defaultTeam = strip(s[1])
+		case "default_channel":
+			config.defaultChannel = strip(s[1])
+		default:
+			config.teams[key] = strip(s[1])
 		}
 	}
 	return config
+}
+
+func strip(s string) string {
+	return strings.Replace(s, " ", "", -1)
 }
 
 func readLines(path string) []string {
@@ -90,7 +96,6 @@ func readLines(path string) []string {
 			lines = append(lines, scanner.Text())
 		}
 	}
-
 	return lines
 }
 
