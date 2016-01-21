@@ -15,6 +15,12 @@ const (
 	scope     = "channels%3Aread+groups%3Aread+im%3Aread+users%3Aread+chat%3Awrite%3Auser+files%3Awrite%3Auser"
 )
 
+type Config struct {
+	teams          map[string]string
+	defaultTeam    string
+	defaultChannel string
+}
+
 func getConfigPath() string {
 	homedir := os.Getenv("HOME")
 	if homedir == "" {
@@ -23,34 +29,69 @@ func getConfigPath() string {
 	return homedir + "/.slackcat"
 }
 
-func getToken(teamName string) string {
-	token := readConfig()[teamName]
-	if token == "" {
-		exitErr(fmt.Errorf("no such team configured: %s", teamName))
+func (c *Config) parseChannelOpt(channel string) (string, string, error) {
+	//use default channel if none provided
+	if channel == "" {
+		if c.defaultChannel == "" {
+			return "", "", fmt.Errorf("no channel provided!")
+		} else {
+			return c.defaultTeam, c.defaultChannel, nil
+		}
 	}
-	return token
+	//if channel is prefixed with a team
+	if strings.Contains(channel, ":") {
+		s := strings.Split(channel, ":")
+		return s[0], s[1], nil
+	}
+	//use default team with provided channel
+	return c.defaultTeam, channel, nil
 }
 
-func readConfig() map[string]string {
-	var line string
+func readConfig() *Config {
+	config := &Config{
+		teams:          make(map[string]string),
+		defaultTeam:    "",
+		defaultChannel: "",
+	}
+	lines := readLines(getConfigPath())
 
-	path := getConfigPath()
+	if len(lines) == 1 {
+		config.teams["default"] = lines[0]
+		config.defaultTeam = "default"
+	} else {
+		for _, line := range lines {
+			s := strings.Split(line, "=")
+			if len(s) != 2 {
+				exitErr(fmt.Errorf("failed to parse config at: %s", line))
+			}
+			switch s[0] {
+			case "default_team":
+				config.defaultTeam = s[1]
+			case "default_channel":
+				config.defaultChannel = s[1]
+			default:
+				config.teams[s[0]] = strings.Replace(s[1], " ", "", -1) //strip whitespace
+			}
+		}
+	}
+	return config
+}
+
+func readLines(path string) []string {
+	var lines []string
+
 	file, err := os.Open(path)
 	failOnError(err, "unable to read config", true)
 	defer file.Close()
 
-	teams := make(map[string]string)
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		line = scanner.Text()
-		if strings.Contains(line, ":") {
-			s := strings.Split(line, ":")
-			teams[s[0]] = strings.Replace(s[1], " ", "", -1)
-		} else {
-			teams["default"] = line
+		if scanner.Text() != "" {
+			lines = append(lines, scanner.Text())
 		}
 	}
-	return teams
+
+	return lines
 }
 
 func configureOA() {
