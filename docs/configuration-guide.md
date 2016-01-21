@@ -18,6 +18,7 @@ echo '<your-slack-token>' > ~/.slackcat
 
 Advanced configuration allows for multiple Slack teams, a default team and default channel
 
+#### Example ~/.slackcat Config
 ```bash
 default_team=team1
 default_channel=general
