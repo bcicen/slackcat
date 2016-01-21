@@ -20,10 +20,10 @@ Advanced configuration allows for multiple Slack teams, a default team and defau
 
 #### Example ~/.slackcat Config
 ```bash
-default_team=team1
-default_channel=general
-team1=<team1-slack-token>
-team2=<team2-slack-token>
+team1 = <team1-slack-token>
+team2 = <team2-slack-token>
+default_team = team1
+default_channel = general
 ```
 By default, all messages will be sent to the team1 general channel.
 
