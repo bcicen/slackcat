@@ -39,8 +39,8 @@ func writeTemp(lines chan string) string {
 }
 
 func output(s string) {
-	cyan := color.New(color.Bold).SprintFunc()
-	fmt.Printf("%s %s\n", cyan("slackcat"), s)
+	bold := color.New(color.Bold).SprintFunc()
+	fmt.Printf("%s %s\n", bold("slackcat"), s)
 }
 
 func failOnError(err error, msg string, appendErr bool) {
