@@ -55,25 +55,27 @@ func readConfig() *Config {
 	}
 	lines := readLines(getConfigPath())
 
+	//simple config file
 	if len(lines) == 1 {
 		config.teams["default"] = lines[0]
 		config.defaultTeam = "default"
 		return config
 	}
 
+	//advanced config file
 	for _, line := range lines {
 		s := strings.Split(line, "=")
 		if len(s) != 2 {
 			exitErr(fmt.Errorf("failed to parse config at: %s", line))
 		}
-		key := strip(s[0])
+		key, val := strip(s[0]), strip(s[1])
 		switch key {
 		case "default_team":
-			config.defaultTeam = strip(s[1])
+			config.defaultTeam = val
 		case "default_channel":
-			config.defaultChannel = strip(s[1])
+			config.defaultChannel = val
 		default:
-			config.teams[key] = strip(s[1])
+			config.teams[key] = val
 		}
 	}
 	return config
