@@ -22,7 +22,6 @@ arch-release:
 		git clone ssh://aur@aur.archlinux.org/slackcat.git; \
 		cp build/* slackcat/
 	cd arch-release/slackcat/ && \
-		mksrcinfo; \
-		git commit -a -m "Update to $(VERSION)"
+		mksrcinfo
 
 .PHONY: release arch-release
