@@ -111,7 +111,7 @@ func main() {
 		}
 
 		if !c.Bool("stream") && c.Bool("plain") {
-			exitErr(fmt.Errorf("'plain' flag requires 'stream' mode!"))
+			exitErr(fmt.Errorf("'plain' flag requires 'stream' mode"))
 		}
 
 		slackcat, err := newSlackCat(token, channel)

@@ -11,13 +11,14 @@ import (
 	"github.com/bluele/slack"
 )
 
+//SlackCat client
 type SlackCat struct {
 	api         *slack.Slack
 	opts        *slack.ChatPostMessageOpt
 	queue       *StreamQ
 	shutdown    chan os.Signal
 	channelName string
-	channelId   string
+	channelID   string
 }
 
 func newSlackCat(token, channelName string) (*SlackCat, error) {
@@ -28,7 +29,7 @@ func newSlackCat(token, channelName string) (*SlackCat, error) {
 		shutdown:    make(chan os.Signal, 1),
 		channelName: channelName,
 	}
-	err := sc.lookupSlackId()
+	err := sc.lookupSlackID()
 	if err != nil {
 		return nil, err
 	}
@@ -60,22 +61,22 @@ func (sc *SlackCat) exit() {
 	}
 }
 
-//Lookup Slack id for channel, group, or im
-func (sc *SlackCat) lookupSlackId() error {
+//Lookup Slack id for channel, group, or im by name
+func (sc *SlackCat) lookupSlackID() error {
 	api := sc.api
 	channel, err := api.FindChannelByName(sc.channelName)
 	if err == nil {
-		sc.channelId = channel.Id
+		sc.channelID = channel.Id
 		return nil
 	}
 	group, err := api.FindGroupByName(sc.channelName)
 	if err == nil {
-		sc.channelId = group.Id
+		sc.channelID = group.Id
 		return nil
 	}
 	im, err := api.FindImByName(sc.channelName)
 	if err == nil {
-		sc.channelId = im.Id
+		sc.channelID = im.Id
 		return nil
 	}
 	fmt.Println(err)
@@ -109,7 +110,7 @@ func (sc *SlackCat) postMsg(msglines []string, plain bool) {
 		fmtStr = "%s"
 	}
 	msg := fmt.Sprintf(fmtStr, strings.Join(msglines, "\n"))
-	err := sc.api.ChatPostMessage(sc.channelId, msg, sc.opts)
+	err := sc.api.ChatPostMessage(sc.channelID, msg, sc.opts)
 	failOnError(err, "", true)
 	output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
 }
@@ -130,7 +131,7 @@ func (sc *SlackCat) postFile(filePath, fileName string, noop bool) {
 		Filepath: filePath,
 		Filename: fileName,
 		Title:    fileName,
-		Channels: []string{sc.channelId},
+		Channels: []string{sc.channelID},
 	})
 	failOnError(err, "error uploading file to Slack", true)
 	duration := strconv.FormatFloat(time.Since(start).Seconds(), 'f', 3, 64)

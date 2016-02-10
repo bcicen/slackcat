@@ -4,6 +4,7 @@ import (
 	"sync"
 )
 
+//Streaming message queue
 type StreamQ struct {
 	queue []string
 	lock  sync.RWMutex
