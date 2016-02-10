@@ -21,7 +21,7 @@ type SlackCat struct {
 	channelID   string
 }
 
-func newSlackCat(token, channelName string) (*SlackCat, error) {
+func newSlackCat(token, channelName string) *SlackCat {
 	sc := &SlackCat{
 		api:         slack.New(token),
 		opts:        &slack.ChatPostMessageOpt{AsUser: true},
@@ -29,12 +29,14 @@ func newSlackCat(token, channelName string) (*SlackCat, error) {
 		shutdown:    make(chan os.Signal, 1),
 		channelName: channelName,
 	}
-	err := sc.lookupSlackID()
-	if err != nil {
-		return nil, err
-	}
+
+	res, err := sc.api.AuthTest()
+	failOnError(err, "Slack API Error", true)
+	output(fmt.Sprintf("connected to %s as %s", res.Team, res.User))
+	sc.channelID = sc.lookupSlackID()
+
 	signal.Notify(sc.shutdown, os.Interrupt)
-	return sc, nil
+	return sc
 }
 
 func (sc *SlackCat) trap() {
@@ -62,25 +64,22 @@ func (sc *SlackCat) exit() {
 }
 
 //Lookup Slack id for channel, group, or im by name
-func (sc *SlackCat) lookupSlackID() error {
+func (sc *SlackCat) lookupSlackID() string {
 	api := sc.api
 	channel, err := api.FindChannelByName(sc.channelName)
 	if err == nil {
-		sc.channelID = channel.Id
-		return nil
+		return channel.Id
 	}
 	group, err := api.FindGroupByName(sc.channelName)
 	if err == nil {
-		sc.channelID = group.Id
-		return nil
+		return group.Id
 	}
 	im, err := api.FindImByName(sc.channelName)
 	if err == nil {
-		sc.channelID = im.Id
-		return nil
+		return im.Id
 	}
-	fmt.Println(err)
-	return fmt.Errorf("No such channel, group, or im")
+	exitErr(fmt.Errorf("No such channel, group, or im"))
+	return ""
 }
 
 func (sc *SlackCat) addToStreamQ(lines chan string) {
