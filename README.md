@@ -76,4 +76,5 @@ Option | Description
 --noop | Skip posting file to Slack. Useful for testing
 --configure | Configure Slackcat via oauth
 --channel, -c | Slack channel, group, or user to post to
---filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin.
+--filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin
+--filetype | Specify filetype for synax highlighting. Defaults to autodetect

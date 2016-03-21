@@ -92,6 +92,10 @@ func main() {
 			Name:  "filename, n",
 			Usage: "Filename for upload. Defaults to current timestamp",
 		},
+		cli.StringFlag{
+			Name:  "filetype",
+			Usage: "Specify filetype for synax highlighting",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -102,6 +106,7 @@ func main() {
 
 		config := readConfig()
 		fileName := c.String("filename")
+		fileType := c.String("filetype")
 		team, channel, err := config.parseChannelOpt(c.String("channel"))
 		failOnError(err, "", true)
 
@@ -124,7 +129,7 @@ func main() {
 			if fileName == "" {
 				fileName = filepath.Base(filePath)
 			}
-			slackcat.postFile(filePath, fileName, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, fileType, c.Bool("noop"))
 			os.Exit(0)
 		}
 
@@ -140,7 +145,7 @@ func main() {
 		} else {
 			filePath := writeTemp(lines)
 			defer os.Remove(filePath)
-			slackcat.postFile(filePath, fileName, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, fileType, c.Bool("noop"))
 			os.Exit(0)
 		}
 	}
