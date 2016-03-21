@@ -114,7 +114,7 @@ func (sc *SlackCat) postMsg(msglines []string, plain bool) {
 	output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
 }
 
-func (sc *SlackCat) postFile(filePath, fileName string, noop bool) {
+func (sc *SlackCat) postFile(filePath, fileName, fileType string, noop bool) {
 	//default to timestamp for filename
 	if fileName == "" {
 		fileName = strconv.FormatInt(time.Now().Unix(), 10)
@@ -129,6 +129,7 @@ func (sc *SlackCat) postFile(filePath, fileName string, noop bool) {
 	err := sc.api.FilesUpload(&slack.FilesUploadOpt{
 		Filepath: filePath,
 		Filename: fileName,
+		Filetype: fileType,
 		Title:    fileName,
 		Channels: []string{sc.channelID},
 	})
