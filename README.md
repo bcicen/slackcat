@@ -78,3 +78,4 @@ Option | Description
 --channel, -c | Slack channel, group, or user to post to
 --filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin
 --filetype | Specify filetype for synax highlighting. Defaults to autodetect
+--comment | Initial comment for snippet
