@@ -96,6 +96,10 @@ func main() {
 			Name:  "filetype",
 			Usage: "Specify filetype for synax highlighting",
 		},
+		cli.StringFlag{
+			Name:  "comment",
+			Usage: "Initial comment for snippet",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -105,10 +109,12 @@ func main() {
 		}
 
 		config := readConfig()
-		fileName := c.String("filename")
-		fileType := c.String("filetype")
 		team, channel, err := config.parseChannelOpt(c.String("channel"))
 		failOnError(err, "", true)
+
+		fileName := c.String("filename")
+		fileType := c.String("filetype")
+		fileComment := c.String("comment")
 
 		token := config.teams[team]
 		if token == "" {
@@ -129,7 +135,7 @@ func main() {
 			if fileName == "" {
 				fileName = filepath.Base(filePath)
 			}
-			slackcat.postFile(filePath, fileName, fileType, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, fileType, fileComment, c.Bool("noop"))
 			os.Exit(0)
 		}
 
@@ -145,7 +151,7 @@ func main() {
 		} else {
 			filePath := writeTemp(lines)
 			defer os.Remove(filePath)
-			slackcat.postFile(filePath, fileName, fileType, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, fileType, fileComment, c.Bool("noop"))
 			os.Exit(0)
 		}
 	}
