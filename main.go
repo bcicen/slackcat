@@ -11,6 +11,7 @@ import (
 	"github.com/fatih/color"
 )
 
+var build = ""
 var version = "dev-build"
 
 func readIn(lines chan string, tee bool) {
@@ -58,7 +59,13 @@ func exitErr(err error) {
 	os.Exit(1)
 }
 
+func printFullVersion(c *cli.Context) {
+	fmt.Fprintf(c.App.Writer, "%v version %v, build %v\n", c.App.Name, c.App.Version, build)
+}
+
 func main() {
+	cli.VersionPrinter = printFullVersion
+
 	app := cli.NewApp()
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
