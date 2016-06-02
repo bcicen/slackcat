@@ -104,9 +104,7 @@ func readLines(path string) []string {
 func configureOA() {
 	oaURL := baseURL + "?scope=" + scope + "&client_id=" + clientID
 	output("Creating token request for Slackcat")
-	err := open.Run(oaURL)
-	if err != nil {
-		output("Please open the below URL in your browser to authorize SlackCat")
-		output(oaURL)
-	}
+	open.Run(oaURL)
+	output("Use the below URL to authorize slackcat if browser fails to launch")
+	output(oaURL)
 }
