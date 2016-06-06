@@ -11,8 +11,10 @@ import (
 	"github.com/fatih/color"
 )
 
-var build = ""
-var version = "dev-build"
+var (
+	build   = ""
+	version = "dev-build"
+)
 
 func readIn(lines chan string, tee bool) {
 	scanner := bufio.NewScanner(os.Stdin)
