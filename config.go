@@ -9,11 +9,7 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-const (
-	baseURL  = "https://slack.com/oauth/authorize"
-	clientID = "7065709201.17699618306"
-	scope    = "channels%3Aread+groups%3Aread+im%3Aread+users%3Aread+chat%3Awrite%3Auser+files%3Awrite%3Auser"
-)
+const configURL = "http://slackcat.chat/configure"
 
 //Slack team and channel read from file
 type Config struct {
@@ -102,9 +98,8 @@ func readLines(path string) []string {
 }
 
 func configureOA() {
-	oaURL := baseURL + "?scope=" + scope + "&client_id=" + clientID
 	output("Creating token request for Slackcat")
-	open.Run(oaURL)
+	open.Run(configURL)
 	output("Use the below URL to authorize slackcat if browser fails to launch")
-	output(oaURL)
+	output(configURL)
 }
