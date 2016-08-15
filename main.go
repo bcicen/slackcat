@@ -73,29 +73,17 @@ func main() {
 	app.Usage = "redirect a file to slack"
 	app.Version = version
 	app.Flags = []cli.Flag{
-		cli.BoolFlag{
-			Name:  "tee, t",
-			Usage: "Print stdin to screen before posting",
+		cli.StringFlag{
+			Name:  "channel, c",
+			Usage: "Slack channel or group to post to",
 		},
-		cli.BoolFlag{
-			Name:  "stream, s",
-			Usage: "Stream messages to Slack continuously instead of uploading a single snippet",
-		},
-		cli.BoolFlag{
-			Name:  "plain, p",
-			Usage: "Write messages as plain texts instead of code blocks",
-		},
-		cli.BoolFlag{
-			Name:  "noop",
-			Usage: "Skip posting file to Slack. Useful for testing",
+		cli.StringFlag{
+			Name:  "comment",
+			Usage: "Initial comment for snippet",
 		},
 		cli.BoolFlag{
 			Name:  "configure",
 			Usage: "Configure Slackcat via oauth",
-		},
-		cli.StringFlag{
-			Name:  "channel, c",
-			Usage: "Slack channel or group to post to",
 		},
 		cli.StringFlag{
 			Name:  "filename, n",
@@ -105,9 +93,21 @@ func main() {
 			Name:  "filetype",
 			Usage: "Specify filetype for synax highlighting",
 		},
-		cli.StringFlag{
-			Name:  "comment",
-			Usage: "Initial comment for snippet",
+		cli.BoolFlag{
+			Name:  "noop",
+			Usage: "Skip posting file to Slack. Useful for testing",
+		},
+		cli.BoolFlag{
+			Name:  "plain, p",
+			Usage: "Write streamed messages as plain text instead of code blocks",
+		},
+		cli.BoolFlag{
+			Name:  "stream, s",
+			Usage: "Stream messages to Slack continuously instead of uploading a single snippet",
+		},
+		cli.BoolFlag{
+			Name:  "tee, t",
+			Usage: "Print stdin to screen before posting",
 		},
 	}
 
