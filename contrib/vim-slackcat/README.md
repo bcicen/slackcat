@@ -1,6 +1,12 @@
 # vim-slackcat.vim
 Ridiculously simple plugin to send a visual selection to an Slack channel
 
+## Notes
+* By default, the command is mapped to `<Leader>s`
+* It accepts `g:slackcat_default_channel` as a config variable in your .vimrc
+
+slackcat (http://slackcat.chat/) must be configured beforehand.
+
 ## License
 Copyright © 2016 Paco Esteban <paco@onna.be>
 
@@ -21,9 +27,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-## Notes
-The command is mapped to <Leader>s
-It accepts `g:slackcat_default_channel` as a config variable in your .vimrc
-
-slackcat (http://slackcat.chat/) must be configured beforehand.
