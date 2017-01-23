@@ -12,6 +12,7 @@ import (
 )
 
 var (
+	noop    = false
 	build   = ""
 	version = "dev-build"
 )
@@ -117,6 +118,7 @@ func main() {
 		team, channel, err := config.parseChannelOpt(c.String("channel"))
 		failOnError(err, "", true)
 
+		noop = c.Bool("noop")
 		fileName := c.String("filename")
 		fileType := c.String("filetype")
 		fileComment := c.String("comment")
@@ -136,7 +138,7 @@ func main() {
 			if fileName == "" {
 				fileName = filepath.Base(filePath)
 			}
-			slackcat.postFile(filePath, fileName, fileType, fileComment, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, fileType, fileComment)
 			os.Exit(0)
 		}
 
@@ -146,13 +148,13 @@ func main() {
 		if c.Bool("stream") {
 			output("starting stream")
 			go slackcat.addToStreamQ(lines)
-			go slackcat.processStreamQ(c.Bool("noop"))
+			go slackcat.processStreamQ()
 			go slackcat.trap()
 			select {}
 		} else {
 			filePath := writeTemp(lines)
 			defer os.Remove(filePath)
-			slackcat.postFile(filePath, fileName, fileType, fileComment, c.Bool("noop"))
+			slackcat.postFile(filePath, fileName, fileType, fileComment)
 			os.Exit(0)
 		}
 	}

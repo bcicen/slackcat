@@ -90,7 +90,7 @@ func (sc *SlackCat) addToStreamQ(lines chan string) {
 }
 
 //TODO: handle messages with length exceeding maximum for Slack chat
-func (sc *SlackCat) processStreamQ(noop bool) {
+func (sc *SlackCat) processStreamQ() {
 	if !(sc.queue.isEmpty()) {
 		msglines := sc.queue.flush()
 		if noop {
@@ -100,7 +100,7 @@ func (sc *SlackCat) processStreamQ(noop bool) {
 		}
 	}
 	time.Sleep(3 * time.Second)
-	sc.processStreamQ(noop)
+	sc.processStreamQ()
 }
 
 func (sc *SlackCat) postMsg(msglines []string) {
@@ -110,7 +110,7 @@ func (sc *SlackCat) postMsg(msglines []string) {
 	output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
 }
 
-func (sc *SlackCat) postFile(filePath, fileName, fileType, fileComment string, noop bool) {
+func (sc *SlackCat) postFile(filePath, fileName, fileType, fileComment string) {
 	//default to timestamp for filename
 	if fileName == "" {
 		fileName = strconv.FormatInt(time.Now().Unix(), 10)
