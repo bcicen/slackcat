@@ -58,7 +58,7 @@ $ slackcat --channel general /home/user/bot.png
 *slackcat* file bot.png uploaded to general
 ```
 
-Stream input continously as a formatted message:
+Stream input continously:
 ```bash
 $ tail -F -n0 /path/to/log | slackcat --channel general --stream
 *slackcat* posted 5 message lines to general
@@ -72,7 +72,6 @@ Option | Description
 --- | ---
 --tee, -t | Print stdin to screen before posting
 --stream, -s | Stream messages to Slack continuously instead of uploading a single snippet
---plain, -p | When streaming, write messages as plain text instead of code blocks
 --noop | Skip posting file to Slack. Useful for testing
 --configure | Configure Slackcat via oauth
 --channel, -c | Slack channel, group, or user to post to
