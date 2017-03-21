@@ -17,8 +17,8 @@ type SlackCat struct {
 	opts        *slack.ChatPostMessageOpt
 	queue       *StreamQ
 	shutdown    chan os.Signal
-	channelName string
 	channelID   string
+	channelName string
 }
 
 func newSlackCat(token, channelName string) *SlackCat {
@@ -37,6 +37,22 @@ func newSlackCat(token, channelName string) *SlackCat {
 
 	signal.Notify(sc.shutdown, os.Interrupt)
 	return sc
+}
+
+//Lookup Slack id for channel, group, or im by name
+func (sc *SlackCat) lookupSlackID() string {
+	api := sc.api
+	if channel, err := api.FindChannelByName(sc.channelName); err == nil {
+		return channel.Id
+	}
+	if group, err := api.FindGroupByName(sc.channelName); err == nil {
+		return group.Id
+	}
+	if im, err := api.FindImByName(sc.channelName); err == nil {
+		return im.Id
+	}
+	exitErr(fmt.Errorf("No such channel, group, or im"))
+	return ""
 }
 
 func (sc *SlackCat) trap() {
@@ -61,25 +77,6 @@ func (sc *SlackCat) exit() {
 			time.Sleep(3 * time.Second)
 		}
 	}
-}
-
-//Lookup Slack id for channel, group, or im by name
-func (sc *SlackCat) lookupSlackID() string {
-	api := sc.api
-	channel, err := api.FindChannelByName(sc.channelName)
-	if err == nil {
-		return channel.Id
-	}
-	group, err := api.FindGroupByName(sc.channelName)
-	if err == nil {
-		return group.Id
-	}
-	im, err := api.FindImByName(sc.channelName)
-	if err == nil {
-		return im.Id
-	}
-	exitErr(fmt.Errorf("No such channel, group, or im"))
-	return ""
 }
 
 func (sc *SlackCat) addToStreamQ(lines chan string) {
@@ -107,7 +104,8 @@ func (sc *SlackCat) postMsg(msglines []string) {
 	msg := strings.Join(msglines, "\n")
 	err := sc.api.ChatPostMessage(sc.channelID, msg, sc.opts)
 	failOnError(err, "", true)
-	output(fmt.Sprintf("posted %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
+	count := strconv.Itoa(len(msglines))
+	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
 }
 
 func (sc *SlackCat) postFile(filePath, fileName, fileType, fileComment string) {

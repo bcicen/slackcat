@@ -18,14 +18,6 @@ type Config struct {
 	defaultChannel string
 }
 
-func getConfigPath() string {
-	homedir := os.Getenv("HOME")
-	if homedir == "" {
-		exitErr(fmt.Errorf("$HOME not set"))
-	}
-	return homedir + "/.slackcat"
-}
-
 func (c *Config) parseChannelOpt(channel string) (string, string, error) {
 	//use default channel if none provided
 	if channel == "" {
@@ -77,9 +69,15 @@ func readConfig() *Config {
 	return config
 }
 
-func strip(s string) string {
-	return strings.Replace(s, " ", "", -1)
+func getConfigPath() string {
+	home := os.Getenv("HOME")
+	if home == "" {
+		exitErr(fmt.Errorf("$HOME not set"))
+	}
+	return home + "/.slackcat"
 }
+
+func strip(s string) string { return strings.Replace(s, " ", "", -1) }
 
 func readLines(path string) []string {
 	var lines []string
