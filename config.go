@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"re"
 	"strings"
 
 	"github.com/skratchdot/open-golang/open"
@@ -75,6 +76,16 @@ func getConfigPath() string {
 		exitErr(fmt.Errorf("$HOME not set"))
 	}
 	return home + "/.slackcat"
+}
+
+func xdgSupport() bool {
+	re := regexp.MustCompile("^XDG_*")
+	for _, e := range os.Environ() {
+		if re.FindAllString(e, 1) != nil {
+			return true
+		}
+	}
+	return false
 }
 
 func strip(s string) string { return strings.Replace(s, " ", "", -1) }
