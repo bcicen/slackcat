@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"re"
+	"regexp"
 	"strings"
 
 	"github.com/skratchdot/open-golang/open"
@@ -71,11 +71,20 @@ func readConfig() *Config {
 }
 
 func getConfigPath() string {
-	home := os.Getenv("HOME")
-	if home == "" {
+	userHome := os.Getenv("HOME")
+	if userHome == "" {
 		exitErr(fmt.Errorf("$HOME not set"))
 	}
-	return home + "/.slackcat"
+
+	if xdgSupport() {
+		xdgHome := os.Getenv("XDG_CONFIG_HOME")
+		if xdgHome == "" {
+			xdgHome = fmt.Sprintf("%s/.config", userHome)
+		}
+		return fmt.Sprintf("%s/slackcat/config", xdgHome)
+	}
+
+	return fmt.Sprintf("%s/.slackcat", userHome)
 }
 
 func xdgSupport() bool {
