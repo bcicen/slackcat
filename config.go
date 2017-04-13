@@ -71,14 +71,14 @@ func readConfig() *Config {
 }
 
 func getConfigPath() string {
-	userHome := os.Getenv("HOME")
-	if userHome == "" {
+	userHome, ok := os.LookupEnv("HOME")
+	if !ok {
 		exitErr(fmt.Errorf("$HOME not set"))
 	}
 
 	if xdgSupport() {
-		xdgHome := os.Getenv("XDG_CONFIG_HOME")
-		if xdgHome == "" {
+		xdgHome, ok := os.LookupEnv("XDG_CONFIG_HOME")
+		if !ok {
 			xdgHome = fmt.Sprintf("%s/.config", userHome)
 		}
 		return fmt.Sprintf("%s/slackcat/config", xdgHome)
