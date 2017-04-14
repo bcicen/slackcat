@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -14,18 +15,18 @@ const configURL = "http://slackcat.chat/configure"
 
 //Slack team and channel read from file
 type Config struct {
-	teams          map[string]string
-	defaultTeam    string
-	defaultChannel string
+	Teams          map[string]string `toml:"teams"`
+	DefaultTeam    string            `toml:"default_team"`
+	DefaultChannel string            `toml:"default_channel"`
 }
 
 func (c *Config) parseChannelOpt(channel string) (string, string, error) {
 	//use default channel if none provided
 	if channel == "" {
-		if c.defaultChannel == "" {
+		if c.DefaultChannel == "" {
 			return "", "", fmt.Errorf("no channel provided")
 		}
-		return c.defaultTeam, c.defaultChannel, nil
+		return c.DefaultTeam, c.DefaultChannel, nil
 	}
 	//if channel is prefixed with a team
 	if strings.Contains(channel, ":") {
@@ -33,39 +34,25 @@ func (c *Config) parseChannelOpt(channel string) (string, string, error) {
 		return s[0], s[1], nil
 	}
 	//use default team with provided channel
-	return c.defaultTeam, channel, nil
+	return c.DefaultTeam, channel, nil
 }
 
-func readConfig() *Config {
-	config := &Config{
-		teams:          make(map[string]string),
-		defaultTeam:    "",
-		defaultChannel: "",
-	}
+func readConfig() Config {
+	var config Config
+
 	lines := readLines(getConfigPath())
 
 	//simple config file
 	if len(lines) == 1 {
-		config.teams["default"] = lines[0]
-		config.defaultTeam = "default"
+		config.Teams["default"] = lines[0]
+		config.DefaultTeam = "default"
 		return config
 	}
 
 	//advanced config file
-	for _, line := range lines {
-		s := strings.Split(line, "=")
-		if len(s) != 2 {
-			exitErr(fmt.Errorf("failed to parse config at: %s", line))
-		}
-		key, val := strip(s[0]), strip(s[1])
-		switch key {
-		case "default_team":
-			config.defaultTeam = val
-		case "default_channel":
-			config.defaultChannel = val
-		default:
-			config.teams[key] = val
-		}
+	body := strings.Join(lines, "\n")
+	if _, err := toml.Decode(body, &config); err != nil {
+		exitErr(fmt.Errorf("failed to parse config: %s", err))
 	}
 	return config
 }

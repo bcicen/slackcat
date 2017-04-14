@@ -123,7 +123,7 @@ func main() {
 		fileType := c.String("filetype")
 		fileComment := c.String("comment")
 
-		token := config.teams[team]
+		token := config.Teams[team]
 		if token == "" {
 			exitErr(fmt.Errorf("no such team: %s", team))
 		}
