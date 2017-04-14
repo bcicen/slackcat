@@ -16,14 +16,16 @@ echo '<your-slack-token>' > ~/.slackcat
 
 ## Advanced Configuration
 
-Advanced configuration allows for multiple Slack teams, a default team and default channel
+Advanced configuration allows for multiple Slack teams, a default team, and default channel in [TOML](https://github.com/toml-lang/toml) format.
 
 #### Example ~/.slackcat Config
 ```bash
-team1 = <team1-slack-token>
-team2 = <team2-slack-token>
-default_team = team1
-default_channel = general
+default_team = "team1"
+default_channel = "general"
+
+[teams]
+  team1 = "<team1-slack-token>"
+  team2 = "<team2-slack-token>"
 ```
 By default, all messages will be sent to the team1 general channel.
 
