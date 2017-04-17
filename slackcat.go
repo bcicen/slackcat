@@ -103,6 +103,10 @@ func (sc *SlackCat) processStreamQ() {
 
 func (sc *SlackCat) postMsg(msglines []string) {
 	msg := strings.Join(msglines, "\n")
+	msg = strings.Replace(msg, "&", "%26amp%3B", -1)
+	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
+	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
+
 	err := sc.api.ChatPostMessage(sc.channelID, msg, sc.opts)
 	failOnError(err, "", true)
 	count := strconv.Itoa(len(msglines))
