@@ -70,7 +70,7 @@ func (sc *SlackCat) trap() {
 
 func (sc *SlackCat) exit() {
 	for {
-		if sc.queue.isEmpty() {
+		if sc.queue.IsEmpty() {
 			os.Exit(0)
 		} else {
 			output("flushing remaining messages to Slack...")
@@ -81,20 +81,21 @@ func (sc *SlackCat) exit() {
 
 func (sc *SlackCat) addToStreamQ(lines chan string) {
 	for line := range lines {
-		sc.queue.add(line)
+		sc.queue.Add(line)
 	}
 	sc.exit()
 }
 
 //TODO: handle messages with length exceeding maximum for Slack chat
 func (sc *SlackCat) processStreamQ() {
-	if !(sc.queue.isEmpty()) {
-		msglines := sc.queue.flush()
+	if !(sc.queue.IsEmpty()) {
+		msglines := sc.queue.Flush()
 		if noop {
 			output(fmt.Sprintf("skipped posting of %s message lines to %s", strconv.Itoa(len(msglines)), sc.channelName))
 		} else {
 			sc.postMsg(msglines)
 		}
+		sc.queue.Ack()
 	}
 	time.Sleep(3 * time.Second)
 	sc.processStreamQ()
