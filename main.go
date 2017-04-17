@@ -15,6 +15,10 @@ var (
 	noop    = false
 	build   = ""
 	version = "dev-build"
+
+	bold = color.New(color.Bold).SprintFunc()
+	red  = color.New(color.FgRed).SprintFunc()
+	cyan = color.New(color.FgCyan).SprintFunc()
 )
 
 func readIn(lines chan string, tee bool) {
@@ -43,8 +47,7 @@ func writeTemp(lines chan string) string {
 }
 
 func output(s string) {
-	bold := color.New(color.Bold).SprintFunc()
-	fmt.Printf("%s %s\n", bold("slackcat"), s)
+	fmt.Printf("%s %s\n", bold(cyan("slackcat")), s)
 }
 
 func failOnError(err error, msg string, appendErr bool) {
@@ -58,7 +61,7 @@ func failOnError(err error, msg string, appendErr bool) {
 }
 
 func exitErr(err error) {
-	output(color.RedString(err.Error()))
+	output(red(err.Error()))
 	os.Exit(1)
 }
 
@@ -114,7 +117,12 @@ func main() {
 			os.Exit(0)
 		}
 
-		config := readConfig()
+		configPath, exists := getConfigPath()
+		if !exists {
+			exitErr(fmt.Errorf("missing config file at %s\nuse --configure to create", configPath))
+		}
+		config := readConfig(configPath)
+
 		team, channel, err := config.parseChannelOpt(c.String("channel"))
 		failOnError(err, "", true)
 
