@@ -11,45 +11,52 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-const configURL = "http://slackcat.chat/configure"
+const AuthURL = "http://slackcat.chat/configure"
 
-//Slack team and channel read from file
+var config *Config
+
+// Slack team and channel read from file
 type Config struct {
 	Teams          map[string]string `toml:"teams"`
 	DefaultTeam    string            `toml:"default_team"`
 	DefaultChannel string            `toml:"default_channel"`
 }
 
+func NewConfig() *Config {
+	return &Config{
+		Teams: make(map[string]string),
+	}
+}
+
 func (c *Config) parseChannelOpt(channel string) (string, string, error) {
-	//use default channel if none provided
+	// use default channel if none provided
 	if channel == "" {
 		if c.DefaultChannel == "" {
 			return "", "", fmt.Errorf("no channel provided")
 		}
 		return c.DefaultTeam, c.DefaultChannel, nil
 	}
-	//if channel is prefixed with a team
+	// if channel is prefixed with a team
 	if strings.Contains(channel, ":") {
 		s := strings.Split(channel, ":")
 		return s[0], s[1], nil
 	}
-	//use default team with provided channel
+	// use default team with provided channel
 	return c.DefaultTeam, channel, nil
 }
 
-func readConfig() Config {
+func readConfig(path string) Config {
 	var config Config
+	lines := readLines(path)
 
-	lines := readLines(getConfigPath())
-
-	//simple config file
+	// simple config file
 	if len(lines) == 1 {
 		config.Teams["default"] = lines[0]
 		config.DefaultTeam = "default"
 		return config
 	}
 
-	//advanced config file
+	// advanced config file
 	body := strings.Join(lines, "\n")
 	if _, err := toml.Decode(body, &config); err != nil {
 		exitErr(fmt.Errorf("failed to parse config: %s", err))
@@ -57,7 +64,8 @@ func readConfig() Config {
 	return config
 }
 
-func getConfigPath() string {
+// determine config path from environment
+func getConfigPath() (path string, exists bool) {
 	userHome, ok := os.LookupEnv("HOME")
 	if !ok {
 		exitErr(fmt.Errorf("$HOME not set"))
@@ -68,10 +76,16 @@ func getConfigPath() string {
 		if !ok {
 			xdgHome = fmt.Sprintf("%s/.config", userHome)
 		}
-		return fmt.Sprintf("%s/slackcat/config", xdgHome)
+		path = fmt.Sprintf("%s/slackcat/config", xdgHome)
+	} else {
+		fmt.Sprintf("%s/.slackcat", userHome)
 	}
 
-	return fmt.Sprintf("%s/.slackcat", userHome)
+	if _, err := os.Stat(path); err == nil {
+		exists = true
+	}
+
+	return path, exists
 }
 
 func xdgSupport() bool {
@@ -102,9 +116,69 @@ func readLines(path string) []string {
 	return lines
 }
 
+func initConfig(path string) {
+	var config Config
+	cfgdir := basedir(path)
+	if _, err := os.Stat(cfgdir); err != nil {
+		err = os.Mkdir(cfgdir, 0755)
+		if err != nil {
+			exitErr(fmt.Errorf("failed to initialize config: %s", err))
+		}
+	}
+	writeConfig(path, config)
+}
+
+func writeConfig(path string, config Config) {
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		exitErr(fmt.Errorf("failed to open config for writing: %s", err))
+	}
+
+	writer := toml.NewEncoder(file)
+	err = writer.Encode(config)
+	if err != nil {
+		exitErr(fmt.Errorf("failed to write config: %s", err))
+	}
+}
+
+func basedir(path string) string {
+	parts := strings.Split(path, "/")
+	return strings.Join((parts[0 : len(parts)-1]), "/")
+}
+
 func configureOA() {
-	output("Creating token request for Slackcat")
-	open.Run(configURL)
+	var nick, token string
+	var config Config
+
+	cfgPath, cfgExists := getConfigPath()
+	if !cfgExists {
+		initConfig(cfgPath)
+	}
+	config = readConfig(cfgPath)
+
+	fmt.Printf("nickname for team: ")
+	fmt.Scanf("%s", &nick)
+	if nick == "" {
+		exitErr(fmt.Errorf("no name provided"))
+	}
+
+	output("creating token request for slackcat")
+	open.Run(AuthURL)
 	output("Use the below URL to authorize slackcat if browser fails to launch")
-	output(configURL)
+	output(AuthURL)
+
+	fmt.Printf("token issued: ")
+	fmt.Scanf("%s", &token)
+	if token == "" {
+		exitErr(fmt.Errorf("no token provided"))
+	}
+
+	// creating a new config file
+	if !cfgExists {
+		config.DefaultTeam = nick
+	}
+	config.Teams[nick] = token
+	writeConfig(cfgPath, config)
+
+	output(fmt.Sprintf("added team to config file at %s", cfgPath))
 }
