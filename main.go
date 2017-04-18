@@ -121,7 +121,7 @@ func main() {
 		if !exists {
 			exitErr(fmt.Errorf("missing config file at %s\nuse --configure to create", configPath))
 		}
-		config := readConfig(configPath)
+		config := ReadConfig(configPath)
 
 		team, channel, err := config.parseChannelOpt(c.String("channel"))
 		failOnError(err, "", true)

@@ -13,8 +13,6 @@ import (
 
 const AuthURL = "http://slackcat.chat/configure"
 
-var config *Config
-
 // Slack team and channel read from file
 type Config struct {
 	Teams          map[string]string `toml:"teams"`
@@ -22,9 +20,52 @@ type Config struct {
 	DefaultChannel string            `toml:"default_channel"`
 }
 
+// Return new default config
 func NewConfig() *Config {
 	return &Config{
 		Teams: make(map[string]string),
+	}
+}
+
+// Return config read from file
+func ReadConfig(path string) *Config {
+	config := NewConfig()
+	lines := readLines(path)
+
+	// simple config file
+	if len(lines) == 1 {
+		config.Teams["default"] = lines[0]
+		config.DefaultTeam = "default"
+		return config
+	}
+
+	// advanced config file
+	body := strings.Join(lines, "\n")
+	if _, err := toml.Decode(body, &config); err != nil {
+		exitErr(fmt.Errorf("failed to parse config: %s", err))
+	}
+	return config
+}
+
+func (c *Config) Write(path string) {
+	cfgdir := basedir(path)
+	// create config dir if not exist
+	if _, err := os.Stat(cfgdir); err != nil {
+		err = os.Mkdir(cfgdir, 0755)
+		if err != nil {
+			exitErr(fmt.Errorf("failed to initialize config dir: %s", err))
+		}
+	}
+
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		exitErr(fmt.Errorf("failed to open config for writing: %s", err))
+	}
+
+	writer := toml.NewEncoder(file)
+	err = writer.Encode(c)
+	if err != nil {
+		exitErr(fmt.Errorf("failed to write config: %s", err))
 	}
 }
 
@@ -43,25 +84,6 @@ func (c *Config) parseChannelOpt(channel string) (string, string, error) {
 	}
 	// use default team with provided channel
 	return c.DefaultTeam, channel, nil
-}
-
-func readConfig(path string) Config {
-	var config Config
-	lines := readLines(path)
-
-	// simple config file
-	if len(lines) == 1 {
-		config.Teams["default"] = lines[0]
-		config.DefaultTeam = "default"
-		return config
-	}
-
-	// advanced config file
-	body := strings.Join(lines, "\n")
-	if _, err := toml.Decode(body, &config); err != nil {
-		exitErr(fmt.Errorf("failed to parse config: %s", err))
-	}
-	return config
 }
 
 // determine config path from environment
@@ -99,6 +121,10 @@ func xdgSupport() bool {
 }
 
 func strip(s string) string { return strings.Replace(s, " ", "", -1) }
+func basedir(path string) string {
+	parts := strings.Split(path, "/")
+	return strings.Join((parts[0 : len(parts)-1]), "/")
+}
 
 func readLines(path string) []string {
 	var lines []string
@@ -116,45 +142,16 @@ func readLines(path string) []string {
 	return lines
 }
 
-func initConfig(path string) {
-	var config Config
-	cfgdir := basedir(path)
-	if _, err := os.Stat(cfgdir); err != nil {
-		err = os.Mkdir(cfgdir, 0755)
-		if err != nil {
-			exitErr(fmt.Errorf("failed to initialize config: %s", err))
-		}
-	}
-	writeConfig(path, config)
-}
-
-func writeConfig(path string, config Config) {
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		exitErr(fmt.Errorf("failed to open config for writing: %s", err))
-	}
-
-	writer := toml.NewEncoder(file)
-	err = writer.Encode(config)
-	if err != nil {
-		exitErr(fmt.Errorf("failed to write config: %s", err))
-	}
-}
-
-func basedir(path string) string {
-	parts := strings.Split(path, "/")
-	return strings.Join((parts[0 : len(parts)-1]), "/")
-}
-
 func configureOA() {
 	var nick, token string
-	var config Config
+	var config *Config
 
 	cfgPath, cfgExists := getConfigPath()
 	if !cfgExists {
-		initConfig(cfgPath)
+		config = NewConfig()
+	} else {
+		config = ReadConfig(cfgPath)
 	}
-	config = readConfig(cfgPath)
 
 	fmt.Printf("nickname for team: ")
 	fmt.Scanf("%s", &nick)
@@ -178,7 +175,7 @@ func configureOA() {
 		config.DefaultTeam = nick
 	}
 	config.Teams[nick] = token
-	writeConfig(cfgPath, config)
+	config.Write(cfgPath)
 
 	output(fmt.Sprintf("added team to config file at %s", cfgPath))
 }
