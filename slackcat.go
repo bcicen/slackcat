@@ -11,8 +11,8 @@ import (
 	"github.com/bluele/slack"
 )
 
-//SlackCat client
-type SlackCat struct {
+//Slackcat client
+type Slackcat struct {
 	api         *slack.Slack
 	opts        *slack.ChatPostMessageOpt
 	queue       *StreamQ
@@ -21,8 +21,8 @@ type SlackCat struct {
 	channelName string
 }
 
-func newSlackCat(token, channelName string) *SlackCat {
-	sc := &SlackCat{
+func newSlackcat(token, channelName string) *Slackcat {
+	sc := &Slackcat{
 		api:         slack.New(token),
 		opts:        &slack.ChatPostMessageOpt{AsUser: true},
 		queue:       newStreamQ(),
@@ -40,7 +40,7 @@ func newSlackCat(token, channelName string) *SlackCat {
 }
 
 //Lookup Slack id for channel, group, or im by name
-func (sc *SlackCat) lookupSlackID() string {
+func (sc *Slackcat) lookupSlackID() string {
 	api := sc.api
 	if channel, err := api.FindChannelByName(sc.channelName); err == nil {
 		return channel.Id
@@ -55,7 +55,7 @@ func (sc *SlackCat) lookupSlackID() string {
 	return ""
 }
 
-func (sc *SlackCat) trap() {
+func (sc *Slackcat) trap() {
 	sigcount := 0
 	for sig := range sc.shutdown {
 		if sigcount > 0 {
@@ -68,7 +68,7 @@ func (sc *SlackCat) trap() {
 	}
 }
 
-func (sc *SlackCat) exit() {
+func (sc *Slackcat) exit() {
 	for {
 		if sc.queue.IsEmpty() {
 			os.Exit(0)
@@ -79,7 +79,7 @@ func (sc *SlackCat) exit() {
 	}
 }
 
-func (sc *SlackCat) addToStreamQ(lines chan string) {
+func (sc *Slackcat) addToStreamQ(lines chan string) {
 	for line := range lines {
 		sc.queue.Add(line)
 	}
@@ -87,7 +87,7 @@ func (sc *SlackCat) addToStreamQ(lines chan string) {
 }
 
 //TODO: handle messages with length exceeding maximum for Slack chat
-func (sc *SlackCat) processStreamQ() {
+func (sc *Slackcat) processStreamQ() {
 	if !(sc.queue.IsEmpty()) {
 		msglines := sc.queue.Flush()
 		if noop {
@@ -101,7 +101,7 @@ func (sc *SlackCat) processStreamQ() {
 	sc.processStreamQ()
 }
 
-func (sc *SlackCat) postMsg(msglines []string) {
+func (sc *Slackcat) postMsg(msglines []string) {
 	msg := strings.Join(msglines, "\n")
 	msg = strings.Replace(msg, "&", "%26amp%3B", -1)
 	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
@@ -113,7 +113,7 @@ func (sc *SlackCat) postMsg(msglines []string) {
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
 }
 
-func (sc *SlackCat) postFile(filePath, fileName, fileType, fileComment string) {
+func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string) {
 	//default to timestamp for filename
 	if fileName == "" {
 		fileName = strconv.FormatInt(time.Now().Unix(), 10)

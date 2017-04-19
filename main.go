@@ -112,7 +112,7 @@ func main() {
 			exitErr(fmt.Errorf("no such team: %s", team))
 		}
 
-		slackcat := newSlackCat(token, channel)
+		slackcat := newSlackcat(token, channel)
 
 		if len(c.Args()) > 0 {
 			if c.Bool("stream") {
