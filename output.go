@@ -4,7 +4,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/fatih/color"
 )
@@ -14,13 +13,6 @@ var (
 	red  = color.New(color.FgRed).SprintFunc()
 	cyan = color.New(color.FgCyan).SprintFunc()
 )
-
-func strip(s string) string { return strings.Replace(s, " ", "", -1) }
-
-func basedir(path string) string {
-	parts := strings.Split(path, "/")
-	return strings.Join((parts[0 : len(parts)-1]), "/")
-}
 
 func output(s string) {
 	fmt.Printf("%s %s\n", bold(cyan("slackcat")), s)

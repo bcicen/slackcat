@@ -111,6 +111,12 @@ func getConfigPath() (path string, exists bool) {
 	return path, exists
 }
 
+func basedir(path string) string {
+	parts := strings.Split(path, "/")
+	return strings.Join((parts[0 : len(parts)-1]), "/")
+}
+
+// Test for environemnt supporting XDG spec
 func xdgSupport() bool {
 	re := regexp.MustCompile("^XDG_*")
 	for _, e := range os.Environ() {
