@@ -30,7 +30,8 @@ func NewConfig() *Config {
 // Return config read from file
 func ReadConfig(path string) *Config {
 	config := NewConfig()
-	lines := readLines(path)
+	lines, err := readLines(path)
+	failOnError(err, "", true)
 
 	// simple config file
 	if len(lines) == 1 {
@@ -120,28 +121,6 @@ func xdgSupport() bool {
 	return false
 }
 
-func strip(s string) string { return strings.Replace(s, " ", "", -1) }
-func basedir(path string) string {
-	parts := strings.Split(path, "/")
-	return strings.Join((parts[0 : len(parts)-1]), "/")
-}
-
-func readLines(path string) []string {
-	var lines []string
-
-	file, err := os.Open(path)
-	failOnError(err, "unable to read config", true)
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		if scanner.Text() != "" {
-			lines = append(lines, scanner.Text())
-		}
-	}
-	return lines
-}
-
 func configureOA() {
 	var nick, token string
 	var config *Config
@@ -178,4 +157,20 @@ func configureOA() {
 	config.Write(cfgPath)
 
 	output(fmt.Sprintf("added team to config file at %s", cfgPath))
+}
+
+func readLines(path string) (lines []string, err error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return lines, appendErr("unable to read config", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		if scanner.Text() != "" {
+			lines = append(lines, scanner.Text())
+		}
+	}
+	return lines, nil
 }

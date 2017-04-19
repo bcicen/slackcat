@@ -8,17 +8,12 @@ import (
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
-	"github.com/fatih/color"
 )
 
 var (
 	noop    = false
 	build   = ""
 	version = "dev-build"
-
-	bold = color.New(color.Bold).SprintFunc()
-	red  = color.New(color.FgRed).SprintFunc()
-	cyan = color.New(color.FgCyan).SprintFunc()
 )
 
 func readIn(lines chan string, tee bool) {
@@ -44,25 +39,6 @@ func writeTemp(lines chan string) string {
 	w.Flush()
 
 	return tmp.Name()
-}
-
-func output(s string) {
-	fmt.Printf("%s %s\n", bold(cyan("slackcat")), s)
-}
-
-func failOnError(err error, msg string, appendErr bool) {
-	if err != nil {
-		if appendErr {
-			exitErr(fmt.Errorf("%s: %s", msg, err))
-		} else {
-			exitErr(fmt.Errorf("%s", msg))
-		}
-	}
-}
-
-func exitErr(err error) {
-	output(red(err.Error()))
-	os.Exit(1)
 }
 
 func printFullVersion(c *cli.Context) {
