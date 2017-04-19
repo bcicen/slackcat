@@ -30,7 +30,7 @@ func readIn(lines chan string, tee bool) {
 
 func writeTemp(lines chan string) string {
 	tmp, err := ioutil.TempFile(os.TempDir(), "slackcat-")
-	failOnError(err, "unable to create tmpfile", false)
+	failOnError(err, "unable to create tmpfile")
 
 	w := bufio.NewWriter(tmp)
 	for line := range lines {
@@ -100,7 +100,7 @@ func main() {
 		config := ReadConfig(configPath)
 
 		team, channel, err := config.parseChannelOpt(c.String("channel"))
-		failOnError(err, "", true)
+		failOnError(err)
 
 		noop = c.Bool("noop")
 		fileName := c.String("filename")

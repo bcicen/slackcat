@@ -31,7 +31,7 @@ func NewConfig() *Config {
 func ReadConfig(path string) *Config {
 	config := NewConfig()
 	lines, err := readLines(path)
-	failOnError(err, "", true)
+	failOnError(err, "unable to read config")
 
 	// simple config file
 	if len(lines) == 1 {
@@ -42,9 +42,9 @@ func ReadConfig(path string) *Config {
 
 	// advanced config file
 	body := strings.Join(lines, "\n")
-	if _, err := toml.Decode(body, &config); err != nil {
-		exitErr(fmt.Errorf("failed to parse config: %s", err))
-	}
+	_, err = toml.Decode(body, &config)
+	failOnError(err, "failed to parse config")
+
 	return config
 }
 
@@ -162,7 +162,7 @@ func configureOA() {
 func readLines(path string) (lines []string, err error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return lines, appendErr("unable to read config", err)
+		return lines, err
 	}
 	defer file.Close()
 

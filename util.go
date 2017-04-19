@@ -26,13 +26,12 @@ func output(s string) {
 	fmt.Printf("%s %s\n", bold(cyan("slackcat")), s)
 }
 
-func failOnError(err error, msg string, appendErr bool) {
+func failOnError(err error, msg ...string) {
 	if err != nil {
-		if appendErr {
-			exitErr(fmt.Errorf("%s: %s", msg, err))
-		} else {
-			exitErr(fmt.Errorf("%s", msg))
+		if msg != nil {
+			err = fmt.Errorf("%s: %s", msg[0], err)
 		}
+		exitErr(err)
 	}
 }
 

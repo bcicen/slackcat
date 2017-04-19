@@ -31,7 +31,7 @@ func newSlackCat(token, channelName string) *SlackCat {
 	}
 
 	res, err := sc.api.AuthTest()
-	failOnError(err, "Slack API Error", true)
+	failOnError(err, "Slack API Error")
 	output(fmt.Sprintf("connected to %s as %s", res.Team, res.User))
 	sc.channelID = sc.lookupSlackID()
 
@@ -108,7 +108,7 @@ func (sc *SlackCat) postMsg(msglines []string) {
 	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
 
 	err := sc.api.ChatPostMessage(sc.channelID, msg, sc.opts)
-	failOnError(err, "", true)
+	failOnError(err)
 	count := strconv.Itoa(len(msglines))
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
 }
@@ -133,7 +133,7 @@ func (sc *SlackCat) postFile(filePath, fileName, fileType, fileComment string) {
 		InitialComment: fileComment,
 		Channels:       []string{sc.channelID},
 	})
-	failOnError(err, "error uploading file to Slack", true)
+	failOnError(err, "error uploading file to Slack")
 	duration := strconv.FormatFloat(time.Since(start).Seconds(), 'f', 3, 64)
 	output(fmt.Sprintf("file %s uploaded to %s (%ss)", fileName, sc.channelName, duration))
 	os.Exit(0)
