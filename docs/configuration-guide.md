@@ -1,5 +1,8 @@
 # Configuration Guide
-Slackcat may be configured via a simple or advanced configuration
+Slackcat may be configured via a simple or advanced configuration.
+
+## Default Path
+If your environment specifies an [XDG Base Directory](https://specifications.freedesktop.org/basedir-spec/latest/index.html), `slackcat` will use the configuration file at `~/.config/slackcat/config`; otherwise, will fallback to `~/.slackcat`
 
 ## Simple Configuration
 
@@ -18,7 +21,7 @@ echo '<your-slack-token>' > ~/.slackcat
 
 Advanced configuration allows for multiple Slack teams, a default team, and default channel in [TOML](https://github.com/toml-lang/toml) format.
 
-#### Example ~/.slackcat Config
+#### Example ~/.config/slackcat Config
 ```bash
 default_team = "team1"
 default_channel = "general"
