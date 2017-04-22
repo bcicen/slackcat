@@ -1,4 +1,4 @@
-// Helper and convenience methods
+// output/err convenience methods
 package main
 
 import (

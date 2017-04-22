@@ -130,11 +130,7 @@ func main() {
 		go readIn(lines, c.Bool("tee"))
 
 		if c.Bool("stream") {
-			output("starting stream")
-			go slackcat.addToStreamQ(lines)
-			go slackcat.processStreamQ()
-			go slackcat.trap()
-			select {}
+			slackcat.stream(lines)
 		} else {
 			filePath := writeTemp(lines)
 			defer os.Remove(filePath)

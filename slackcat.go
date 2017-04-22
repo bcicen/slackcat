@@ -11,10 +11,13 @@ import (
 	"github.com/bluele/slack"
 )
 
+var (
+	msgOpts = &slack.ChatPostMessageOpt{AsUser: true}
+)
+
 //Slackcat client
 type Slackcat struct {
 	api         *slack.Slack
-	opts        *slack.ChatPostMessageOpt
 	queue       *StreamQ
 	shutdown    chan os.Signal
 	channelID   string
@@ -24,7 +27,6 @@ type Slackcat struct {
 func newSlackcat(token, channelName string) *Slackcat {
 	sc := &Slackcat{
 		api:         slack.New(token),
-		opts:        &slack.ChatPostMessageOpt{AsUser: true},
 		queue:       newStreamQ(),
 		shutdown:    make(chan os.Signal, 1),
 		channelName: channelName,
@@ -79,14 +81,21 @@ func (sc *Slackcat) exit() {
 	}
 }
 
-func (sc *Slackcat) addToStreamQ(lines chan string) {
-	for line := range lines {
-		sc.queue.Add(line)
-	}
-	sc.exit()
+func (sc *Slackcat) stream(lines chan string) {
+	output("starting stream")
+
+	go func() {
+		for line := range lines {
+			sc.queue.Add(line)
+		}
+		sc.exit()
+	}()
+
+	go sc.processStreamQ()
+	go sc.trap()
+	select {}
 }
 
-//TODO: handle messages with length exceeding maximum for Slack chat
 func (sc *Slackcat) processStreamQ() {
 	if !(sc.queue.IsEmpty()) {
 		msglines := sc.queue.Flush()
@@ -107,7 +116,7 @@ func (sc *Slackcat) postMsg(msglines []string) {
 	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
 	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
 
-	err := sc.api.ChatPostMessage(sc.channelID, msg, sc.opts)
+	err := sc.api.ChatPostMessage(sc.channelID, msg, msgOpts)
 	failOnError(err)
 	count := strconv.Itoa(len(msglines))
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
