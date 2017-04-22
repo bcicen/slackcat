@@ -15,7 +15,7 @@ var (
 )
 
 func output(s string) {
-	fmt.Printf("%s %s\n", bold(cyan("slackcat")), s)
+	fmt.Printf("%s %s\n", cyan("slackcat"), s)
 }
 
 func failOnError(err error, msg ...string) {
