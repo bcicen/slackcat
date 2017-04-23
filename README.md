@@ -17,7 +17,7 @@ brew install slackcat
 ```
 or
 ```bash
-curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.1/slackcat-1.1-darwin-amd64
+curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.2/slackcat-1.2-darwin-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -25,7 +25,7 @@ sudo chmod +x /usr/local/bin/slackcat
 #### Linux
 
 ```bash
-wget https://github.com/vektorlab/slackcat/releases/download/v1.1/slackcat-1.1-linux-amd64 -O slackcat
+wget https://github.com/vektorlab/slackcat/releases/download/v1.2/slackcat-1.2-linux-amd64 -O slackcat
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
