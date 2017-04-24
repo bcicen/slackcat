@@ -54,7 +54,7 @@ func (c *Config) Write(path string) {
 	if _, err := os.Stat(cfgdir); err != nil {
 		err = os.Mkdir(cfgdir, 0755)
 		if err != nil {
-			exitErr(fmt.Errorf("failed to initialize config dir: %s", err))
+			exitErr(fmt.Errorf("failed to initialize config dir [%s]: %s", cfgdir, err))
 		}
 	}
 
@@ -101,7 +101,7 @@ func getConfigPath() (path string, exists bool) {
 		}
 		path = fmt.Sprintf("%s/slackcat/config", xdgHome)
 	} else {
-		fmt.Sprintf("%s/.slackcat", userHome)
+		path = fmt.Sprintf("%s/.slackcat", userHome)
 	}
 
 	if _, err := os.Stat(path); err == nil {
