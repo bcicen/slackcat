@@ -11,6 +11,7 @@ build:
 	GOOS=darwin GOARCH=amd64 go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o build/slackcat-$(VERSION)-darwin-amd64
 	GOOS=linux GOARCH=amd64 go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o build/slackcat-$(VERSION)-linux-amd64
 	GOOS=linux GOARCH=arm go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o build/slackcat-$(VERSION)-linux-arm
+	GOOS=windows GOARCH=386 go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o build/slackcat-$(VERSION).exe
 
 release:
 	mkdir release
