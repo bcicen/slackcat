@@ -94,14 +94,14 @@ func getConfigPath() (path string, exists bool) {
 		exitErr(fmt.Errorf("$HOME not set"))
 	}
 
+	path = fmt.Sprintf("%s/.slackcat", userHome) // default path
+
 	if xdgSupport() {
 		xdgHome, ok := os.LookupEnv("XDG_CONFIG_HOME")
 		if !ok {
 			xdgHome = fmt.Sprintf("%s/.config", userHome)
 		}
 		path = fmt.Sprintf("%s/slackcat/config", xdgHome)
-	} else {
-		path = fmt.Sprintf("%s/.slackcat", userHome)
 	}
 
 	if _, err := os.Stat(path); err == nil {
