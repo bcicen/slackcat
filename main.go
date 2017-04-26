@@ -71,7 +71,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:  "filetype",
-			Usage: "Specify filetype for synax highlighting",
+			Usage: "Specify filetype for syntax highlighting",
 		},
 		cli.BoolFlag{
 			Name:  "noop",
