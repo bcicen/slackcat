@@ -74,6 +74,10 @@ func main() {
 			Usage: "Specify filetype for syntax highlighting",
 		},
 		cli.BoolFlag{
+			Name:  "list",
+			Usage: "List team channel names",
+		},
+		cli.BoolFlag{
 			Name:  "noop",
 			Usage: "Skip posting file to Slack. Useful for testing",
 		},
@@ -113,6 +117,22 @@ func main() {
 		}
 
 		slackcat := newSlackcat(token, channel)
+
+		if c.Bool("list") {
+			fmt.Println("channels:")
+			for _, n := range slackcat.listChannels() {
+				fmt.Printf("  %s\n", n)
+			}
+			fmt.Println("groups:")
+			for _, n := range slackcat.listGroups() {
+				fmt.Printf("  %s\n", n)
+			}
+			fmt.Println("ims:")
+			for _, n := range slackcat.listIms() {
+				fmt.Printf("  %s\n", n)
+			}
+			os.Exit(0)
+		}
 
 		if len(c.Args()) > 0 {
 			if c.Bool("stream") {

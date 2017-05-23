@@ -41,7 +41,44 @@ func newSlackcat(token, channelName string) *Slackcat {
 	return sc
 }
 
-//Lookup Slack id for channel, group, or im by name
+type ChannelList struct {
+	channels []string
+	groups   []string
+	ims      []string
+	mpims    []string
+}
+
+// Return list of all channels by name
+func (sc *Slackcat) listChannels() (names []string) {
+	list, err := sc.api.ChannelsList()
+	failOnError(err)
+	for _, c := range list {
+		names = append(names, c.Name)
+	}
+	return names
+}
+
+// Return list of all groups by name
+func (sc *Slackcat) listGroups() (names []string) {
+	list, err := sc.api.GroupsList()
+	failOnError(err)
+	for _, c := range list {
+		names = append(names, c.Name)
+	}
+	return names
+}
+
+// Return list of all ims by name
+func (sc *Slackcat) listIms() (names []string) {
+	list, err := sc.api.ImList()
+	failOnError(err)
+	for _, c := range list {
+		names = append(names, c.User)
+	}
+	return names
+}
+
+// Lookup Slack id for channel, group, or im by name
 func (sc *Slackcat) lookupSlackID() string {
 	api := sc.api
 	if channel, err := api.FindChannelByName(sc.channelName); err == nil {
