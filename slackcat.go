@@ -70,10 +70,18 @@ func (sc *Slackcat) listGroups() (names []string) {
 
 // Return list of all ims by name
 func (sc *Slackcat) listIms() (names []string) {
+	users, err := sc.api.UsersList()
+	failOnError(err)
+
 	list, err := sc.api.ImList()
 	failOnError(err)
 	for _, c := range list {
-		names = append(names, c.User)
+		for _, u := range users {
+			if u.Id == c.User {
+				names = append(names, u.Name)
+				continue
+			}
+		}
 	}
 	return names
 }
