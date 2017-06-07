@@ -41,6 +41,12 @@ func writeTemp(lines chan string) string {
 	return tmp.Name()
 }
 
+func handleUsageError(c *cli.Context, err error, _ bool) error {
+	fmt.Fprintf(c.App.Writer, "%s %s\n\n", "Incorrect Usage.", err.Error())
+	cli.ShowAppHelp(c)
+	return cli.NewExitError("", 1)
+}
+
 func printFullVersion(c *cli.Context) {
 	fmt.Fprintf(c.App.Writer, "%v version %v, build %v\n", c.App.Name, c.App.Version, build)
 }
@@ -52,6 +58,7 @@ func main() {
 	app.Name = "slackcat"
 	app.Usage = "redirect a file to slack"
 	app.Version = version
+	app.OnUsageError = handleUsageError
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:  "channel, c",
