@@ -37,12 +37,16 @@ function! SendToSlack()
     let s_lang = input("lang? ", &filetype)
     call inputrestore()
     echo "\rSending to Slack ..."
-    let s_selection = s:getVisualSelection()
+    let s_selection = s:escapeTildes(s:getVisualSelection())
     if empty(s_lang)
         let s_lang = 'txt'
     endif
     let return = system("echo '". s_selection ."' |slackcat -c " . s_channel . " --filetype " . s_lang)
     echo "\rSent !"
+endfunction
+
+function! s:escapeTildes(text)
+    return substitute(a:text, "'", "'\"'\"'", 'g')
 endfunction
 
 function! s:getVisualSelection()
