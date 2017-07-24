@@ -12,12 +12,19 @@ import (
 )
 
 var (
+	api     *slack.Slack
 	msgOpts = &slack.ChatPostMessageOpt{AsUser: true}
 )
 
+func InitAPI(token string) {
+	api = slack.New(token)
+	res, err := api.AuthTest()
+	failOnError(err, "Slack API Error")
+	output(fmt.Sprintf("connected to %s as %s", res.Team, res.User))
+}
+
 //Slackcat client
 type Slackcat struct {
-	api         *slack.Slack
 	queue       *StreamQ
 	shutdown    chan os.Signal
 	channelID   string
@@ -26,31 +33,20 @@ type Slackcat struct {
 
 func newSlackcat(token, channelName string) *Slackcat {
 	sc := &Slackcat{
-		api:         slack.New(token),
 		queue:       newStreamQ(),
 		shutdown:    make(chan os.Signal, 1),
 		channelName: channelName,
 	}
 
-	res, err := sc.api.AuthTest()
-	failOnError(err, "Slack API Error")
-	output(fmt.Sprintf("connected to %s as %s", res.Team, res.User))
 	sc.channelID = sc.lookupSlackID()
 
 	signal.Notify(sc.shutdown, os.Interrupt)
 	return sc
 }
 
-type ChannelList struct {
-	channels []string
-	groups   []string
-	ims      []string
-	mpims    []string
-}
-
 // Return list of all channels by name
 func (sc *Slackcat) listChannels() (names []string) {
-	list, err := sc.api.ChannelsList()
+	list, err := api.ChannelsList()
 	failOnError(err)
 	for _, c := range list {
 		names = append(names, c.Name)
@@ -60,7 +56,7 @@ func (sc *Slackcat) listChannels() (names []string) {
 
 // Return list of all groups by name
 func (sc *Slackcat) listGroups() (names []string) {
-	list, err := sc.api.GroupsList()
+	list, err := api.GroupsList()
 	failOnError(err)
 	for _, c := range list {
 		names = append(names, c.Name)
@@ -70,10 +66,10 @@ func (sc *Slackcat) listGroups() (names []string) {
 
 // Return list of all ims by name
 func (sc *Slackcat) listIms() (names []string) {
-	users, err := sc.api.UsersList()
+	users, err := api.UsersList()
 	failOnError(err)
 
-	list, err := sc.api.ImList()
+	list, err := api.ImList()
 	failOnError(err)
 	for _, c := range list {
 		for _, u := range users {
@@ -88,7 +84,6 @@ func (sc *Slackcat) listIms() (names []string) {
 
 // Lookup Slack id for channel, group, or im by name
 func (sc *Slackcat) lookupSlackID() string {
-	api := sc.api
 	if channel, err := api.FindChannelByName(sc.channelName); err == nil {
 		return channel.Id
 	}
@@ -161,7 +156,7 @@ func (sc *Slackcat) postMsg(msglines []string) {
 	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
 	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
 
-	err := sc.api.ChatPostMessage(sc.channelID, msg, msgOpts)
+	err := api.ChatPostMessage(sc.channelID, msg, msgOpts)
 	failOnError(err)
 	count := strconv.Itoa(len(msglines))
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
@@ -179,7 +174,7 @@ func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string) {
 	}
 
 	start := time.Now()
-	err := sc.api.FilesUpload(&slack.FilesUploadOpt{
+	err := api.FilesUpload(&slack.FilesUploadOpt{
 		Filepath:       filePath,
 		Filename:       fileName,
 		Filetype:       fileType,

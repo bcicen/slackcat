@@ -123,6 +123,7 @@ func main() {
 			exitErr(fmt.Errorf("no such team: %s", team))
 		}
 
+		InitAPI(token)
 		slackcat := newSlackcat(token, channel)
 
 		if c.Bool("list") {
