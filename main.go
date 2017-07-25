@@ -128,15 +128,15 @@ func main() {
 
 		if c.Bool("list") {
 			fmt.Println("channels:")
-			for _, n := range slackcat.listChannels() {
+			for _, n := range listChannels() {
 				fmt.Printf("  %s\n", n)
 			}
 			fmt.Println("groups:")
-			for _, n := range slackcat.listGroups() {
+			for _, n := range listGroups() {
 				fmt.Printf("  %s\n", n)
 			}
 			fmt.Println("ims:")
-			for _, n := range slackcat.listIms() {
+			for _, n := range listIms() {
 				fmt.Printf("  %s\n", n)
 			}
 			os.Exit(0)
