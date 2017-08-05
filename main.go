@@ -96,6 +96,10 @@ func main() {
 			Name:  "tee, t",
 			Usage: "Print stdin to screen before posting",
 		},
+		cli.StringFlag{
+			Name:  "username, u",
+			Usage: "Stream messages as given bot user. Defaults to auth user",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -114,6 +118,7 @@ func main() {
 		failOnError(err)
 
 		noop = c.Bool("noop")
+		username := c.String("username")
 		fileName := c.String("filename")
 		fileType := c.String("filetype")
 		fileComment := c.String("comment")
@@ -124,7 +129,7 @@ func main() {
 		}
 
 		InitAPI(token)
-		slackcat := newSlackcat(token, channel)
+		slackcat := newSlackcat(username, channel)
 
 		if c.Bool("list") {
 			fmt.Println("channels:")

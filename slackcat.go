@@ -15,15 +15,17 @@ import (
 type Slackcat struct {
 	queue       *StreamQ
 	shutdown    chan os.Signal
+	username    string
 	channelID   string
 	channelName string
 }
 
-func newSlackcat(token, channelName string) *Slackcat {
+func newSlackcat(username, channelname string) *Slackcat {
 	sc := &Slackcat{
 		queue:       newStreamQ(),
 		shutdown:    make(chan os.Signal, 1),
-		channelName: channelName,
+		username:    username,
+		channelName: channelname,
 	}
 
 	sc.channelID = lookupSlackID(sc.channelName)
@@ -90,6 +92,15 @@ func (sc *Slackcat) postMsg(msglines []string) {
 	msg = strings.Replace(msg, "&", "%26amp%3B", -1)
 	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
 	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
+
+	msgOpts := &slack.ChatPostMessageOpt{AsUser: true}
+	if sc.username != "" {
+		msgOpts.AsUser = false
+		msgOpts.Username = sc.username
+	}
+
+	fmt.Println(msgOpts.AsUser)
+	fmt.Println(msgOpts.Username)
 
 	err := api.ChatPostMessage(sc.channelID, msg, msgOpts)
 	failOnError(err)
