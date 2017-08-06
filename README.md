@@ -17,7 +17,7 @@ brew install slackcat
 ```
 or
 ```bash
-curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.2.1/slackcat-1.2.1-darwin-amd64
+curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.3/slackcat-1.3-darwin-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -25,7 +25,7 @@ sudo chmod +x /usr/local/bin/slackcat
 #### Linux
 
 ```bash
-wget https://github.com/vektorlab/slackcat/releases/download/v1.2.1/slackcat-1.2.1-linux-amd64 -O slackcat
+wget https://github.com/vektorlab/slackcat/releases/download/v1.3/slackcat-1.3-linux-amd64 -O slackcat
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -73,3 +73,4 @@ Option | Description
 --filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin
 --filetype | Specify filetype for synax highlighting. Defaults to autodetect
 --comment | Initial comment for snippet
+--username | Stream messages as given bot user. Defaults to auth user
