@@ -99,9 +99,6 @@ func (sc *Slackcat) postMsg(msglines []string) {
 		msgOpts.Username = sc.username
 	}
 
-	fmt.Println(msgOpts.AsUser)
-	fmt.Println(msgOpts.Username)
-
 	err := api.ChatPostMessage(sc.channelID, msg, msgOpts)
 	failOnError(err)
 	count := strconv.Itoa(len(msglines))
