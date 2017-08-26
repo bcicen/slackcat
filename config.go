@@ -52,7 +52,7 @@ func (c *Config) Write(path string) {
 	cfgdir := basedir(path)
 	// create config dir if not exist
 	if _, err := os.Stat(cfgdir); err != nil {
-		err = os.Mkdir(cfgdir, 0755)
+		err = os.MkdirAll(cfgdir, 0755)
 		if err != nil {
 			exitErr(fmt.Errorf("failed to initialize config dir [%s]: %s", cfgdir, err))
 		}
