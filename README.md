@@ -10,24 +10,15 @@ Slackcat is a simple commandline utility to post snippets to Slack.
 ### Installing
 Download the latest release for your platform:
 
-#### OS X
+```bash
+curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.3/slackcat-1.3-$(uname -s)-amd64
+sudo mv slackcat /usr/local/bin/
+sudo chmod +x /usr/local/bin/slackcat
+```
 
+`slackcat` is also available via homebrew:
 ```brew
 brew install slackcat
-```
-or
-```bash
-curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.3/slackcat-1.3-darwin-amd64
-sudo mv slackcat /usr/local/bin/
-sudo chmod +x /usr/local/bin/slackcat
-```
-
-#### Linux
-
-```bash
-wget https://github.com/vektorlab/slackcat/releases/download/v1.3/slackcat-1.3-linux-amd64 -O slackcat
-sudo mv slackcat /usr/local/bin/
-sudo chmod +x /usr/local/bin/slackcat
 ```
 
 ### Configuration
