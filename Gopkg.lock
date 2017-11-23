@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/bluele/slack"
   packages = ["."]
-  revision = "b5a7526d62db4690f8a49a30c8ed46f90d0f29f7"
+  revision = "fb5cadcf9ed2433b94f44b2bc046a7f94554533e"
 
 [[projects]]
   name = "github.com/fatih/color"
@@ -28,8 +28,8 @@
 [[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
-  revision = "fc9e8d8ef48496124e79ae0df75490096eccf6fe"
-  version = "v0.0.2"
+  revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
+  version = "v0.0.3"
 
 [[projects]]
   branch = "master"
@@ -40,14 +40,14 @@
 [[projects]]
   name = "github.com/urfave/cli"
   packages = ["."]
-  revision = "0bdeddeeb0f650497d603c4ad7b20cfe685682f6"
-  version = "v1.19.1"
+  revision = "cfb38830724cc34fedffe9a2a29fb54fa9169cd1"
+  version = "v1.20.0"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "d8f5ea21b9295e315e612b4bcf4bedea93454d4d"
+  revision = "a13efeb2fd213cf4be7227992aa54519af3b2ac0"
 
 [solve-meta]
   analyzer-name = "dep"
