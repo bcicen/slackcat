@@ -5,9 +5,7 @@ Slackcat is a simple commandline utility to post snippets to Slack.
   <img width="500px" src="https://raw.githubusercontent.com/vektorlab/slackcat/master/demo.gif" alt="slackcat"/>
 
 
-## Quickstart
-
-### Installing
+## Installing
 Download the latest release for your platform:
 
 ```bash
@@ -21,7 +19,15 @@ sudo chmod +x /usr/local/bin/slackcat
 brew install slackcat
 ```
 
-### Configuration
+## Building
+To optionally build `slackcat` from source, ensure you have [dep](https://github.com/golang/dep) installed and run:
+```
+go get github.com/vektorlab/slackcat && \
+cd $GOPATH/src/github.com/vektorlab/slackcat && \
+make build
+```
+
+## Configuration
 
 Generate an initial config, or add a new team token with:
 ```bash
