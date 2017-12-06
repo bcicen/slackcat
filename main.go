@@ -36,6 +36,7 @@ func (s *StdinScanner) StreamBytes() chan []byte {
 				fmt.Printf("%s", b)
 			}
 		}
+		failOnError(s.Err(), "error reading input")
 		close(ch)
 	}()
 	return ch
@@ -51,6 +52,7 @@ func (s *StdinScanner) StreamLines() chan string {
 				fmt.Println(s.Text())
 			}
 		}
+		failOnError(s.Err(), "error reading input")
 		close(ch)
 	}()
 	return ch
