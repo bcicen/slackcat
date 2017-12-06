@@ -16,29 +16,44 @@ var (
 	version = "dev-build"
 )
 
-func readInBytes(ch chan []byte, tee bool) {
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Split(bufio.ScanBytes)
-	for scanner.Scan() {
-		b := scanner.Bytes()
-		ch <- b
-		if tee {
-			fmt.Printf("%s", b)
-		}
-	}
-	close(ch)
+type StdinScanner struct {
+	*bufio.Scanner
+	tee bool
 }
 
-func readInLines(ch chan string, tee bool) {
-	scanner := bufio.NewScanner(os.Stdin)
-	scanner.Split(bufio.ScanLines)
-	for scanner.Scan() {
-		ch <- scanner.Text()
-		if tee {
-			fmt.Println(scanner.Text())
+func NewStdinScanner(tee bool) *StdinScanner {
+	return &StdinScanner{bufio.NewScanner(os.Stdin), tee}
+}
+
+func (s *StdinScanner) StreamBytes() chan []byte {
+	ch := make(chan []byte)
+	s.Split(bufio.ScanBytes)
+	go func() {
+		for s.Scan() {
+			b := s.Bytes()
+			ch <- b
+			if s.tee {
+				fmt.Printf("%s", b)
+			}
 		}
-	}
-	close(ch)
+		close(ch)
+	}()
+	return ch
+}
+
+func (s *StdinScanner) StreamLines() chan string {
+	ch := make(chan string)
+	s.Split(bufio.ScanLines)
+	go func() {
+		for s.Scan() {
+			ch <- s.Text()
+			if s.tee {
+				fmt.Println(s.Text())
+			}
+		}
+		close(ch)
+	}()
+	return ch
 }
 
 func writeTemp(byteCh chan []byte) string {
@@ -47,7 +62,7 @@ func writeTemp(byteCh chan []byte) string {
 
 	w := bufio.NewWriter(tmp)
 	for b := range byteCh {
-		n, err := w.Write(b)
+		_, err := w.Write(b)
 		failOnError(err, "error writing to tmpfile")
 	}
 	w.Flush()
@@ -173,16 +188,13 @@ func main() {
 			os.Exit(0)
 		}
 
+		scanner := NewStdinScanner(c.Bool("tee"))
+
 		if c.Bool("stream") {
-			lineCh := make(chan string)
-			go readInLines(lineCh, c.Bool("tee"))
-			slackcat.stream(lineCh)
+			slackcat.stream(scanner.StreamLines())
 		} else {
-			byteCh := make(chan []byte)
-			go readInBytes(byteCh, c.Bool("tee"))
-			filePath := writeTemp(byteCh)
+			filePath := writeTemp(scanner.StreamBytes())
 			defer os.Remove(filePath)
-			fmt.Println(filePath)
 			slackcat.postFile(filePath, fileName, fileType, fileComment)
 			os.Exit(0)
 		}
