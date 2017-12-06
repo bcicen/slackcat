@@ -16,25 +16,39 @@ var (
 	version = "dev-build"
 )
 
-func readIn(lines chan string, tee bool) {
+func readInBytes(ch chan []byte, tee bool) {
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Split(bufio.ScanBytes)
+	for scanner.Scan() {
+		b := scanner.Bytes()
+		ch <- b
+		if tee {
+			fmt.Printf("%s", b)
+		}
+	}
+	close(ch)
+}
+
+func readInLines(ch chan string, tee bool) {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		lines <- scanner.Text()
+		ch <- scanner.Text()
 		if tee {
 			fmt.Println(scanner.Text())
 		}
 	}
-	close(lines)
+	close(ch)
 }
 
-func writeTemp(lines chan string) string {
+func writeTemp(byteCh chan []byte) string {
 	tmp, err := ioutil.TempFile(os.TempDir(), "slackcat-")
 	failOnError(err, "unable to create tmpfile")
 
 	w := bufio.NewWriter(tmp)
-	for line := range lines {
-		fmt.Fprintln(w, line)
+	for b := range byteCh {
+		n, err := w.Write(b)
+		failOnError(err, "error writing to tmpfile")
 	}
 	w.Flush()
 
@@ -159,14 +173,16 @@ func main() {
 			os.Exit(0)
 		}
 
-		lines := make(chan string)
-		go readIn(lines, c.Bool("tee"))
-
 		if c.Bool("stream") {
-			slackcat.stream(lines)
+			lineCh := make(chan string)
+			go readInLines(lineCh, c.Bool("tee"))
+			slackcat.stream(lineCh)
 		} else {
-			filePath := writeTemp(lines)
+			byteCh := make(chan []byte)
+			go readInBytes(byteCh, c.Bool("tee"))
+			filePath := writeTemp(byteCh)
 			defer os.Remove(filePath)
+			fmt.Println(filePath)
 			slackcat.postFile(filePath, fileName, fileType, fileComment)
 			os.Exit(0)
 		}
