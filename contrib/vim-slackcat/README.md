@@ -5,12 +5,12 @@ Ridiculously simple plugin to send a visual selection to an Slack channel
 
 Install via your preferred plugin manager; e.g. Vundle:
 ```
-Plugin 'vektorlab/slackcat', {'rtp': 'contrib/vim-slackcat' }
+Plugin 'bcicen/slackcat', {'rtp': 'contrib/vim-slackcat' }
 ```
 
 Or manually:
 ```
-curl -Lo ~/.vim/plugin/slackcat.vim https://raw.githubusercontent.com/vektorlab/slackcat/master/contrib/vim-slackcat/plugin/vim-slackcat.vim
+curl -Lo ~/.vim/plugin/slackcat.vim https://raw.githubusercontent.com/bcicen/slackcat/master/contrib/vim-slackcat/plugin/vim-slackcat.vim
 ```
 
 ## Notes

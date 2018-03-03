@@ -20,14 +20,14 @@ release:
 	mkdir release
 	go get github.com/progrium/gh-release/...
 	cp build/* release
-	gh-release create vektorlab/$(NAME) $(VERSION) \
+	gh-release create bcicen/$(NAME) $(VERSION) \
 		$(shell git rev-parse --abbrev-ref HEAD) $(VERSION)
 
 arch-release:
 	mkdir -p arch-release
 	go get github.com/seletskiy/go-makepkg/...
 	cd arch-release && \
-		go-makepkg -p version "Commandline utility for posting snippets to Slack" git://github.com/vektorlab/slackcat.git; \
+		go-makepkg -p version "Commandline utility for posting snippets to Slack" git://github.com/bcicen/slackcat.git; \
 		git clone ssh://aur@aur.archlinux.org/slackcat.git; \
 		cp build/* slackcat/
 	cd arch-release/slackcat/ && \

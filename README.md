@@ -2,14 +2,14 @@
 Slackcat is a simple commandline utility to post snippets to Slack.
 
 
-  <img width="500px" src="https://raw.githubusercontent.com/vektorlab/slackcat/master/demo.gif" alt="slackcat"/>
+  <img width="500px" src="https://raw.githubusercontent.com/bcicen/slackcat/master/demo.gif" alt="slackcat"/>
 
 
 ## Installing
 Download the latest release for your platform:
 
 ```bash
-curl -Lo slackcat https://github.com/vektorlab/slackcat/releases/download/v1.4/slackcat-1.4-$(uname -s)-amd64
+curl -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v1.4/slackcat-1.4-$(uname -s)-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
@@ -22,8 +22,8 @@ brew install slackcat
 ## Building
 To optionally build `slackcat` from source, ensure you have [dep](https://github.com/golang/dep) installed and run:
 ```
-go get github.com/vektorlab/slackcat && \
-cd $GOPATH/src/github.com/vektorlab/slackcat && \
+go get github.com/bcicen/slackcat && \
+cd $GOPATH/src/github.com/bcicen/slackcat && \
 make build
 ```
 
@@ -35,7 +35,7 @@ slackcat --configure
 ```
 You'll be prompted for a team nickname and a new browser window will be opened for you to confirm the request via Slack. Provide the returned token to slackcat when prompted, and you're ready to go!
 
-For configuring multiple teams and default channels, see [Configuration Guide](https://github.com/vektorlab/slackcat/blob/master/docs/configuration-guide.md).
+For configuring multiple teams and default channels, see [Configuration Guide](https://github.com/bcicen/slackcat/blob/master/docs/configuration-guide.md).
 
 ## Usage
 Pipe command output as a text snippet:
