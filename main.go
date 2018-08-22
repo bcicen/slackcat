@@ -131,6 +131,10 @@ func main() {
 			Name:  "username, u",
 			Usage: "Stream messages as given bot user. Defaults to auth user",
 		},
+		cli.StringFlag{
+			Name:  "iconemoji, i",
+			Usage: "Stream messages as given bot icon emoji. Defaults to auth user's icon",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -150,6 +154,7 @@ func main() {
 
 		noop = c.Bool("noop")
 		username := c.String("username")
+		iconEmoji := c.String("iconemoji")
 		fileName := c.String("filename")
 		fileType := c.String("filetype")
 		fileComment := c.String("comment")
@@ -160,7 +165,7 @@ func main() {
 		}
 
 		InitAPI(token)
-		slackcat := newSlackcat(username, channel)
+		slackcat := newSlackcat(username, iconEmoji, channel)
 
 		if c.Bool("list") {
 			fmt.Println("channels:")
