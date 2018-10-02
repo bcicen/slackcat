@@ -16,15 +16,17 @@ type Slackcat struct {
 	queue       *StreamQ
 	shutdown    chan os.Signal
 	username    string
+	iconEmoji   string
 	channelID   string
 	channelName string
 }
 
-func newSlackcat(username, channelname string) *Slackcat {
+func newSlackcat(username, iconEmoji, channelname string) *Slackcat {
 	sc := &Slackcat{
 		queue:       newStreamQ(),
 		shutdown:    make(chan os.Signal, 1),
 		username:    username,
+		iconEmoji:   iconEmoji,
 		channelName: channelname,
 	}
 
@@ -97,6 +99,9 @@ func (sc *Slackcat) postMsg(msglines []string) {
 	if sc.username != "" {
 		msgOpts.AsUser = false
 		msgOpts.Username = sc.username
+	}
+	if sc.iconEmoji != "" {
+		msgOpts.IconEmoji = sc.iconEmoji
 	}
 
 	err := api.ChatPostMessage(sc.channelID, msg, msgOpts)
