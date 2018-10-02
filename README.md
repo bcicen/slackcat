@@ -66,6 +66,7 @@ Option | Description
 --stream, -s | Stream messages to Slack continuously instead of uploading a single snippet
 --noop | Skip posting file to Slack. Useful for testing
 --configure | Configure Slackcat via oauth
+--iconemoji, -i | Specify emoji icon for message (e.g. ":+1:")
 --channel, -c | Slack channel, group, or user to post to
 --filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin
 --filetype | Specify filetype for synax highlighting. Defaults to autodetect
