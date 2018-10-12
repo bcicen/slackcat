@@ -159,6 +159,22 @@ func main() {
 		fileType := c.String("filetype")
 		fileComment := c.String("comment")
 
+		if c.Bool("list") {
+			for teamName, token := range config.Teams {
+				InitAPI(token)
+				for _, n := range listChannels() {
+					fmt.Printf("[%s] [channel]  %s\n", teamName, n)
+				}
+				for _, n := range listGroups() {
+					fmt.Printf("[%s] [group]  %s\n", teamName, n)
+				}
+				for _, n := range listIms() {
+					fmt.Printf("[%s] [im]  %s\n", teamName, n)
+				}
+			}
+			os.Exit(0)
+		}
+
 		token := config.Teams[team]
 		if token == "" {
 			exitErr(fmt.Errorf("no such team: %s", team))
@@ -166,22 +182,6 @@ func main() {
 
 		InitAPI(token)
 		slackcat := newSlackcat(username, iconEmoji, channel)
-
-		if c.Bool("list") {
-			fmt.Println("channels:")
-			for _, n := range listChannels() {
-				fmt.Printf("  %s\n", n)
-			}
-			fmt.Println("groups:")
-			for _, n := range listGroups() {
-				fmt.Printf("  %s\n", n)
-			}
-			fmt.Println("ims:")
-			for _, n := range listIms() {
-				fmt.Printf("  %s\n", n)
-			}
-			os.Exit(0)
-		}
 
 		if len(c.Args()) > 0 {
 			if c.Bool("stream") {

@@ -122,7 +122,7 @@ func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string) {
 	}
 
 	start := time.Now()
-	_, err := api.FilesUpload(&slack.FilesUploadOpt{
+	err := api.FilesUpload(&slack.FilesUploadOpt{
 		Filepath:       filePath,
 		Filename:       fileName,
 		Filetype:       fileType,
