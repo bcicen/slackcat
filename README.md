@@ -9,7 +9,7 @@ Slackcat is a simple commandline utility to post snippets to Slack.
 Download the latest release for your platform:
 
 ```bash
-curl -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v1.4/slackcat-1.4-$(uname -s)-amd64
+curl -Lo slackcat https://github.com/bcicen/slackcat/releases/download/v1.5/slackcat-1.5-$(uname -s)-amd64
 sudo mv slackcat /usr/local/bin/
 sudo chmod +x /usr/local/bin/slackcat
 ```
