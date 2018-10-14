@@ -50,7 +50,7 @@ $ slackcat --channel general /home/user/bot.png
 *slackcat* file bot.png uploaded to general
 ```
 
-Stream input continously:
+Stream input continuously:
 ```bash
 $ tail -F -n0 /path/to/log | slackcat --channel general --stream
 *slackcat* posted 5 message lines to general
@@ -69,6 +69,6 @@ Option | Description
 --iconemoji, -i | Specify emoji icon for message (e.g. ":+1:")
 --channel, -c | Slack channel, group, or user to post to
 --filename, -n | Filename for upload. Defaults to given filename or current timestamp if reading from stdin
---filetype | Specify filetype for synax highlighting. Defaults to autodetect
+--filetype | Specify filetype for syntax highlighting. Defaults to autodetect
 --comment | Initial comment for snippet
 --username | Stream messages as given bot user. Defaults to auth user
