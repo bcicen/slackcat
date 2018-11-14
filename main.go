@@ -128,6 +128,10 @@ func main() {
 			Usage: "Print stdin to screen before posting",
 		},
 		cli.StringFlag{
+			Name:  "token",
+			Usage: "Optional Slack token to use, ignoring config file",
+		},
+		cli.StringFlag{
 			Name:  "username, u",
 			Usage: "Stream messages as given bot user. Defaults to auth user",
 		},
@@ -138,26 +142,27 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+		var config *Config
+
 		if c.Bool("configure") {
 			configureOA()
 			os.Exit(0)
 		}
 
-		configPath, exists := getConfigPath()
-		if !exists {
-			exitErr(fmt.Errorf("missing config file at %s\nuse --configure to create", configPath))
+		if c.String("token") != "" {
+			config = &Config{
+				Teams: map[string]string{
+					"default": c.String("token"),
+				},
+				DefaultTeam: "default",
+			}
+		} else {
+			configPath, exists := getConfigPath()
+			if !exists {
+				exitErr(fmt.Errorf("missing config file at %s\nuse --configure to create", configPath))
+			}
+			config = ReadConfig(configPath)
 		}
-		config := ReadConfig(configPath)
-
-		team, channel, err := config.parseChannelOpt(c.String("channel"))
-		failOnError(err)
-
-		noop = c.Bool("noop")
-		username := c.String("username")
-		iconEmoji := c.String("iconemoji")
-		fileName := c.String("filename")
-		fileType := c.String("filetype")
-		fileComment := c.String("comment")
 
 		if c.Bool("list") {
 			for teamName, token := range config.Teams {
@@ -174,6 +179,16 @@ func main() {
 			}
 			os.Exit(0)
 		}
+
+		team, channel, err := config.parseChannelOpt(c.String("channel"))
+		failOnError(err)
+
+		noop = c.Bool("noop")
+		username := c.String("username")
+		iconEmoji := c.String("iconemoji")
+		fileName := c.String("filename")
+		fileType := c.String("filetype")
+		fileComment := c.String("comment")
 
 		token := config.Teams[team]
 		if token == "" {
