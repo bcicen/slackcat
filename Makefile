@@ -5,11 +5,13 @@ BUILD=$(shell git rev-parse --short HEAD)
 clean:
 	rm -rf build/ release/ arch-release/
 
-build:
-	dep ensure
+deps:
+	go mod download
+
+build: deps
 	CGO_ENABLED=0 go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o slackcat
 
-build-all:
+build-all: deps
 	mkdir -p build
 	GOOS=darwin GOARCH=amd64 go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o build/slackcat-$(VERSION)-darwin-amd64
 	GOOS=linux GOARCH=amd64 go build -ldflags "-s -X main.version=$(VERSION) -X main.build=$(BUILD)" -o build/slackcat-$(VERSION)-linux-amd64
