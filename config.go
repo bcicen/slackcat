@@ -20,14 +20,14 @@ type Config struct {
 	DefaultChannel string            `toml:"default_channel"`
 }
 
-// Return new default config
+// NewConfig returns new default config
 func NewConfig() *Config {
 	return &Config{
 		Teams: make(map[string]string),
 	}
 }
 
-// Return config read from file
+// ReadConfig returns config read from file
 func ReadConfig(path string) *Config {
 	config := NewConfig()
 	lines, err := readLines(path)

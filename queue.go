@@ -28,7 +28,7 @@ func (q *StreamQ) Add(line string) {
 	q.lock.Unlock()
 }
 
-// return all lines in queue
+// Flush returns all lines in queue
 func (q *StreamQ) Flush() []string {
 	q.lock.Lock()
 	defer q.lock.Unlock()
