@@ -48,12 +48,32 @@ func listIms() (names []string) {
 	for _, c := range list {
 		for _, u := range users {
 			if u.Id == c.User {
+				fmt.Printf("pikachu %s\n", u.Profile.RealName)
 				names = append(names, u.Name)
 				continue
 			}
 		}
 	}
 	return names
+}
+
+// // Lookup Slack id for channel, group, or im by name
+// Lookup Slack id for im by real name
+func lookupSlackIDByRealName(realName string) string {
+	users, err := api.UsersList()
+	failOnError(err)
+
+	list, err := api.ImList()
+	failOnError(err)
+	for _ := range list {
+		for _, u := range users {
+			if u.Profile.RealName == realName {
+				return u.Id
+			}
+		}
+	}
+	exitErr(fmt.Errorf("No such channel, group, or im"))
+	return ""
 }
 
 // Lookup Slack id for channel, group, or im by name
