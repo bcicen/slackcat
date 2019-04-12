@@ -167,12 +167,12 @@ func main() {
 		if c.Bool("list") {
 			for teamName, token := range config.Teams {
 				InitAPI(token)
-				// for _, n := range listChannels() {
-				//     fmt.Printf("[%s] [channel]  %s\n", teamName, n)
-				// }
-				// for _, n := range listGroups() {
-				//     fmt.Printf("[%s] [group]  %s\n", teamName, n)
-				// }
+				for _, n := range listChannels() {
+					fmt.Printf("[%s] [channel]  %s\n", teamName, n)
+				}
+				for _, n := range listGroups() {
+					fmt.Printf("[%s] [group]  %s\n", teamName, n)
+				}
 				for _, n := range listIms() {
 					fmt.Printf("[%s] [im]  %s\n", teamName, n)
 				}
