@@ -31,7 +31,6 @@ func newSlackcat(username, iconEmoji, channelname string) *Slackcat {
 	}
 
 	sc.channelID = lookupSlackID(sc.channelName)
-	// TODO: or lookupSlackIDByRealName(sc.channelName)
 
 	signal.Notify(sc.shutdown, os.Interrupt)
 	return sc
