@@ -3,14 +3,15 @@ package main
 import (
 	"fmt"
 
-	"github.com/bluele/slack"
+	"github.com/slack-go/slack"
 )
 
 var (
-	api     *slack.Slack
-	msgOpts = &slack.ChatPostMessageOpt{AsUser: true}
+	api     *slack.Client
+	msgOpts = &slack.PostMessageParameters{AsUser: true}
 )
 
+// InitAPI for Slack
 func InitAPI(token string) {
 	api = slack.New(token)
 	res, err := api.AuthTest()
@@ -20,7 +21,7 @@ func InitAPI(token string) {
 
 // Return list of all channels by name
 func listChannels() (names []string) {
-	list, err := api.ChannelsList()
+	list, err := getConversations("public_channel", "private_channel")
 	failOnError(err)
 	for _, c := range list {
 		names = append(names, c.Name)
@@ -30,7 +31,7 @@ func listChannels() (names []string) {
 
 // Return list of all groups by name
 func listGroups() (names []string) {
-	list, err := api.GroupsList()
+	list, err := getConversations("mpim")
 	failOnError(err)
 	for _, c := range list {
 		names = append(names, c.Name)
@@ -40,14 +41,14 @@ func listGroups() (names []string) {
 
 // Return list of all ims by name
 func listIms() (names []string) {
-	users, err := api.UsersList()
+	users, err := api.GetUsers()
 	failOnError(err)
 
-	list, err := api.ImList()
+	list, err := getConversations("im")
 	failOnError(err)
 	for _, c := range list {
 		for _, u := range users {
-			if u.Id == c.User {
+			if u.ID == c.User {
 				names = append(names, u.Name)
 				continue
 			}
@@ -58,15 +59,48 @@ func listIms() (names []string) {
 
 // Lookup Slack id for channel, group, or im by name
 func lookupSlackID(name string) string {
-	if channel, err := api.FindChannelByName(name); err == nil {
-		return channel.Id
+	list, err := getConversations("public_channel", "private_channel", "mpim")
+	if err == nil {
+		for _, c := range list {
+			if c.Name == name {
+				return c.ID
+			}
+		}
 	}
-	if group, err := api.FindGroupByName(name); err == nil {
-		return group.Id
-	}
-	if im, err := api.FindImByName(name); err == nil {
-		return im.Id
+	users, err := api.GetUsers()
+	if err == nil {
+		list, err := getConversations("im")
+		if err == nil {
+			for _, c := range list {
+				for _, u := range users {
+					if u.ID == c.User {
+						return c.ID
+					}
+				}
+			}
+		}
 	}
 	exitErr(fmt.Errorf("No such channel, group, or im"))
 	return ""
+}
+
+func getConversations(types ...string) (list []slack.Channel, err error) {
+	cursor := ""
+	for {
+		param := &slack.GetConversationsParameters{
+			Cursor:          cursor,
+			ExcludeArchived: "true",
+			Types:           types,
+		}
+		channels, cur, err := api.GetConversations(param)
+		if err != nil {
+			return list, err
+		}
+		list = append(list, channels...)
+		if cur == "" {
+			break
+		}
+		cursor = cur
+	}
+	return list, nil
 }
