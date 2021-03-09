@@ -20,10 +20,9 @@ build-all: deps
 
 release:
 	mkdir release
-	go get github.com/progrium/gh-release/...
 	cp build/* release
-	gh-release create bcicen/$(NAME) $(VERSION) \
-		$(shell git rev-parse --abbrev-ref HEAD) $(VERSION)
+	cd release; sha256sum --quiet --check sha256sums.txt && \
+	gh release create $(VERSION) -d -t v$(VERSION) *
 
 arch-release:
 	mkdir -p arch-release
