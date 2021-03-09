@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bluele/slack"
+	"github.com/slack-go/slack"
 )
 
 //Slackcat client
@@ -95,16 +95,18 @@ func (sc *Slackcat) postMsg(msglines []string) {
 	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
 	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
 
-	msgOpts := &slack.ChatPostMessageOpt{AsUser: true}
+	msgOpts := []slack.MsgOption{slack.MsgOptionText(msg, false)}
 	if sc.username != "" {
-		msgOpts.AsUser = false
-		msgOpts.Username = sc.username
+		msgOpts = append(msgOpts, slack.MsgOptionAsUser(false))
+		msgOpts = append(msgOpts, slack.MsgOptionUsername(sc.username))
+	} else {
+		msgOpts = append(msgOpts, slack.MsgOptionAsUser(true))
 	}
 	if sc.iconEmoji != "" {
-		msgOpts.IconEmoji = sc.iconEmoji
+		msgOpts = append(msgOpts, slack.MsgOptionIconEmoji(sc.iconEmoji))
 	}
 
-	err := api.ChatPostMessage(sc.channelID, msg, msgOpts)
+	_, _, err := api.PostMessage(sc.channelID, msgOpts...)
 	failOnError(err)
 	count := strconv.Itoa(len(msglines))
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
@@ -122,8 +124,8 @@ func (sc *Slackcat) postFile(filePath, fileName, fileType, fileComment string) {
 	}
 
 	start := time.Now()
-	_, err := api.FilesUpload(&slack.FilesUploadOpt{
-		Filepath:       filePath,
+	_, err := api.UploadFile(slack.FileUploadParameters{
+		File:           filePath,
 		Filename:       fileName,
 		Filetype:       fileType,
 		Title:          fileName,
