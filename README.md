@@ -27,6 +27,13 @@ cd $GOPATH/src/github.com/bcicen/slackcat && \
 make build
 ```
 
+You must use GNU make for the build to work correctly. If your platform does not install GNU make as `make` (i.e. OpenBSD) then you will need to install gmake and run:
+```
+go get github.com/bcicen/slackcat && \
+cd $GOPATH/src/github.com/bcicen/slackcat && \
+gmake build
+```
+
 ## Configuration
 
 Generate an initial config, or add a new team token with:
