@@ -4,7 +4,7 @@ BUILD=$(shell git rev-parse --short HEAD)
 LDFLAGS="-s -X main.version=$(VERSION) -X main.build=$(BUILD)"
 
 clean:
-	rm -rf _build/ _release/ _arch-release/
+	rm -rf _build/ _release/ _aur/
 
 deps:
 	go mod download
@@ -26,12 +26,8 @@ release:
 	cd _release; sha256sum --quiet --check sha256sums.txt && \
 	gh release create $(VERSION) -d -t v$(VERSION) *
 
-arch-release:
-	mkdir -p _arch-release
-	go get github.com/seletskiy/go-makepkg/...
-	cd _arch-release && \
-		go-makepkg -p version "Commandline utility for posting snippets to Slack" git://github.com/bcicen/slackcat.git; \
-		git clone ssh://aur@aur.archlinux.org/slackcat.git; \
-		cp build/* slackcat/
-	cd _arch-release/slackcat/ && \
-		mksrcinfo
+aur:
+	git clone ssh://aur@aur.archlinux.org/slackcat.git _aur
+	cd _aur && \
+		sed -i "/^pkgver=/c\pkgver=$(VERSION)" PKGBUILD && \
+		makepkg --printsrcinfo > .SRCINFO
