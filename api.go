@@ -73,7 +73,7 @@ func lookupSlackID(name string) string {
 		if err == nil {
 			for _, c := range list {
 				for _, u := range users {
-					if u.ID == c.User {
+					if u.Name == name && u.ID == c.User {
 						return c.ID
 					}
 				}
