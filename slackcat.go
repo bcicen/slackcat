@@ -118,8 +118,6 @@ func (sc *Slackcat) postMsg(msglines []string) {
 
 	_, CurMsgTS, err = api.PostMessage(sc.channelID, msgOpts...)
 
-	output(CurMsgTS)
-
 	failOnError(err)
 	count := strconv.Itoa(len(msglines))
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))
