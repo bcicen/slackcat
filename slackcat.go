@@ -89,6 +89,8 @@ func (sc *Slackcat) processStreamQ() {
 	sc.processStreamQ()
 }
 
+var CurMsgTS string
+
 func (sc *Slackcat) postMsg(msglines []string) {
 	msg := strings.Join(msglines, "\n")
 	msg = strings.Replace(msg, "&", "%26amp%3B", -1)
@@ -106,7 +108,18 @@ func (sc *Slackcat) postMsg(msglines []string) {
 		msgOpts = append(msgOpts, slack.MsgOptionIconEmoji(sc.iconEmoji))
 	}
 
-	_, _, err := api.PostMessage(sc.channelID, msgOpts...)
+	if thread {
+		if CurMsgTS != "" {
+			msgOpts = append(msgOpts, slack.MsgOptionTS(CurMsgTS))
+		}
+	}
+
+	var err error
+
+	_, CurMsgTS, err = api.PostMessage(sc.channelID, msgOpts...)
+
+	output(CurMsgTS)
+
 	failOnError(err)
 	count := strconv.Itoa(len(msglines))
 	output(fmt.Sprintf("posted %s message lines to %s", count, sc.channelName))

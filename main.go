@@ -14,6 +14,7 @@ var (
 	noop    = false
 	build   = ""
 	version = "dev-build"
+	thread  = false
 )
 
 type StdinScanner struct {
@@ -139,6 +140,10 @@ func main() {
 			Name:  "iconemoji, i",
 			Usage: "Stream messages as given bot icon emoji. Defaults to auth user's icon",
 		},
+		cli.BoolFlag{
+			Name:  "thread",
+			Usage: "Send subsequent messages as threaded reply to orignial message",
+		},
 	}
 
 	app.Action = func(c *cli.Context) {
@@ -184,6 +189,7 @@ func main() {
 		failOnError(err)
 
 		noop = c.Bool("noop")
+		thread = c.Bool("thread")
 		username := c.String("username")
 		iconEmoji := c.String("iconemoji")
 		fileName := c.String("filename")
@@ -213,6 +219,16 @@ func main() {
 		scanner := NewStdinScanner(c.Bool("tee"))
 
 		if c.Bool("stream") {
+			// If threaded then send comment first to start thread
+			if thread {
+				var s []string
+				if fileComment != "" {
+					s = append(s, fileComment)
+				} else {
+					s = append(s, "Slackcat Stream Output:")
+				}
+				slackcat.postMsg(s)
+			}
 			slackcat.stream(scanner.StreamLines())
 		} else {
 			filePath := writeTemp(scanner.StreamBytes())

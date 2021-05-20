@@ -79,3 +79,4 @@ Option | Description
 --filetype | Specify filetype for syntax highlighting. Defaults to autodetect
 --comment | Initial comment for snippet
 --username | Stream messages as given bot user. Defaults to auth user
+--thread | Stream messages to thread after initial comment message
