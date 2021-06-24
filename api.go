@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/slack-go/slack"
 )
@@ -91,9 +92,15 @@ func getConversations(types ...string) (list []slack.Channel, err error) {
 			Cursor:          cursor,
 			ExcludeArchived: "true",
 			Types:           types,
+			Limit:           1000,
 		}
 		channels, cur, err := api.GetConversations(param)
 		if err != nil {
+			if rateLimitedError, ok := err.(*slack.RateLimitedError); ok {
+				output(fmt.Sprintf("%v", rateLimitedError))
+				time.Sleep(rateLimitedError.RetryAfter)
+				continue
+			}
 			return list, err
 		}
 		list = append(list, channels...)
