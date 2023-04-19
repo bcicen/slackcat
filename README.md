@@ -22,16 +22,18 @@ brew install slackcat
 ## Building
 To optionally build `slackcat` from source, ensure you have [dep](https://github.com/golang/dep) installed and run:
 ```
-go get github.com/bcicen/slackcat && \
-cd $GOPATH/src/github.com/bcicen/slackcat && \
-make build
+$ git clone https://github.com/bcicen/slackcat.git
+$ cd slackcat
+$ go get github.com/bcicen/slackcat
+$ make build
 ```
 
 You must use GNU make for the build to work correctly. If your platform does not install GNU make as `make` (i.e. OpenBSD) then you will need to install gmake and run:
 ```
-go get github.com/bcicen/slackcat && \
-cd $GOPATH/src/github.com/bcicen/slackcat && \
-gmake build
+$ git clone https://github.com/bcicen/slackcat.git
+$ cd slackcat
+$ go get github.com/bcicen/slackcat
+$ gmake build
 ```
 
 ## Configuration
