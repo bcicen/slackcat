@@ -11,7 +11,7 @@ import (
 	"github.com/slack-go/slack"
 )
 
-//Slackcat client
+// Slackcat client
 type Slackcat struct {
 	queue       *StreamQ
 	shutdown    chan os.Signal
@@ -93,11 +93,8 @@ var CurMsgTS string
 
 func (sc *Slackcat) postMsg(msglines []string) {
 	msg := strings.Join(msglines, "\n")
-	msg = strings.Replace(msg, "&", "%26amp%3B", -1)
-	msg = strings.Replace(msg, "<", "%26lt%3B", -1)
-	msg = strings.Replace(msg, ">", "%26gt%3B", -1)
 
-	msgOpts := []slack.MsgOption{slack.MsgOptionText(msg, false)}
+	msgOpts := []slack.MsgOption{slack.MsgOptionText(msg, true)}
 	if sc.username != "" {
 		msgOpts = append(msgOpts, slack.MsgOptionAsUser(false))
 		msgOpts = append(msgOpts, slack.MsgOptionUsername(sc.username))
