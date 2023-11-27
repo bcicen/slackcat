@@ -32,9 +32,7 @@ func (q *StreamQ) Add(line string) {
 func (q *StreamQ) Flush() []string {
 	q.lock.Lock()
 	defer q.lock.Unlock()
-	for _, l := range q.lines {
-		q.unAckd = append(q.unAckd, l)
-	}
+	q.unAckd = append(q.unAckd, q.lines...)
 	q.lines = []string{}
 	return q.unAckd
 }
